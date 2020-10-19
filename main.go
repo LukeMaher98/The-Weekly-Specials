@@ -27,7 +27,7 @@ func main() {
 		if !(checkoutCount >= 1 && checkoutCount <= 8) {
 			checkoutCountTemp := 0
 			fmt.Print("Number of Checkouts [1-8]> ")
-			fmt.Scanf("%d", &checkoutCountTemp)
+			fmt.Scanln(&checkoutCountTemp)
 			fmt.Print("\n")
 			if checkoutCountTemp >= 1 && checkoutCountTemp <= 8 {
 				checkoutCount = checkoutCountTemp
@@ -36,7 +36,7 @@ func main() {
 		} else if !(productsLowerBound >= 1 && productsLowerBound <= 200) {
 			productsLowerBoundTemp := 0
 			fmt.Print("Products per Customer Lower Bound [1-200]> ")
-			fmt.Scanf("%d", &productsLowerBoundTemp)
+			fmt.Scanln(&productsLowerBoundTemp)
 			fmt.Print("\n")
 			if productsLowerBoundTemp >= 1 && productsLowerBoundTemp <= 200 {
 				productsLowerBound = productsLowerBoundTemp
@@ -44,7 +44,7 @@ func main() {
 		} else if !(productsUpperBound >= productsLowerBound && productsUpperBound <= 200) {
 			productsUpperBoundTemp := 0
 			fmt.Printf("Products per Customer Upper Bound [%d-200]> ", productsLowerBound)
-			fmt.Scanf("%d", &productsUpperBoundTemp)
+			fmt.Scanln(&productsUpperBoundTemp)
 			fmt.Print("\n")
 			if productsUpperBoundTemp >= productsLowerBound && productsUpperBoundTemp <= 200 {
 				productsUpperBound = productsUpperBoundTemp
@@ -52,7 +52,7 @@ func main() {
 		} else if !(timeLowerBound >= 0.5 && timeLowerBound <= 6.0) {
 			timeLowerBoundTemp := 0.0
 			fmt.Print("Time per Product Lower Bound [0.5-6.0]> ")
-			fmt.Scanf("%f", &timeLowerBoundTemp)
+			fmt.Scanln(&timeLowerBoundTemp)
 			fmt.Print("\n")
 			if timeLowerBoundTemp >= 0.5 && timeLowerBoundTemp <= 6.0 {
 				timeLowerBound = timeLowerBoundTemp
@@ -60,7 +60,7 @@ func main() {
 		} else if !(timeUpperBound >= timeLowerBound && timeUpperBound <= 6.0) {
 			timeUpperBoundTemp := 0.0
 			fmt.Printf("Time per Product Upper Bound [%f-6.0]> ", timeLowerBound)
-			fmt.Scanf("%f", &timeUpperBoundTemp)
+			fmt.Scanln(&timeUpperBoundTemp)
 			fmt.Print("\n")
 			if timeUpperBoundTemp >= timeLowerBound && timeUpperBoundTemp <= 6.0 {
 				timeUpperBound = timeUpperBoundTemp
@@ -68,7 +68,7 @@ func main() {
 		} else if !(arrivalLowerBound >= 0 && arrivalLowerBound <= 60) {
 			arrivalLowerBoundTemp := -1
 			fmt.Print("Arrival Rate Lower Bound [0-60]> ")
-			fmt.Scanf("%d", &arrivalLowerBoundTemp)
+			fmt.Scanln(&arrivalLowerBoundTemp)
 			fmt.Print("\n")
 			if arrivalLowerBoundTemp >= 0 && arrivalLowerBoundTemp <= 60 {
 				arrivalLowerBound = arrivalLowerBoundTemp
@@ -76,7 +76,7 @@ func main() {
 		} else if !(arrivalUpperBound >= arrivalLowerBound && arrivalUpperBound <= 60) {
 			arrivalUpperBoundTemp := -1
 			fmt.Printf("Arrival Rate Upper Bound [%d-60]> ", arrivalLowerBound)
-			fmt.Scanf("%d", &arrivalUpperBoundTemp)
+			fmt.Scanln(&arrivalUpperBoundTemp)
 			fmt.Print("\n")
 			if arrivalUpperBoundTemp >= arrivalLowerBound && arrivalUpperBoundTemp <= 60 {
 				arrivalUpperBound = arrivalUpperBoundTemp
