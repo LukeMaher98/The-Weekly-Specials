@@ -59,7 +59,7 @@ func main() {
 			}
 		} else if !(timeUpperBound >= timeLowerBound && timeUpperBound <= 6.0) {
 			timeUpperBoundTemp := 0.0
-			fmt.Printf("Time per Product Upper Bound [%f-6.0]> ", timeLowerBound)
+			fmt.Printf("Time per Product Upper Bound [%v-6.0]> ", timeLowerBound)
 			fmt.Scanln(&timeUpperBoundTemp)
 			fmt.Print("\n")
 			if timeUpperBoundTemp >= timeLowerBound && timeUpperBoundTemp <= 6.0 {
@@ -84,7 +84,7 @@ func main() {
 		} else {
 			fmt.Printf("Checkout Count: [%d]\n", checkoutCount)
 			fmt.Printf("Products per Customer Range: [%d-%d]\n", productsLowerBound, productsUpperBound)
-			fmt.Printf("Time per Product Range: [%f-%f]\n", timeLowerBound, timeUpperBound)
+			fmt.Printf("Time per Product Range: [%v-%v]\n", timeLowerBound, timeUpperBound)
 			fmt.Printf("Arrival Rate Range: [%d-%d]\n", arrivalLowerBound, arrivalUpperBound)
 			fmt.Print("\n")
 			fmt.Print("C to reset values, X to exit> ")
