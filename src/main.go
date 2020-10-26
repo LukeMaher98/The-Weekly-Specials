@@ -2,12 +2,31 @@ package main
 
 import (
 	"fmt"
-	scenario "src/scenario"
+	"src/scenario"
+	"time"
 )
 
 func main() {
-	scenario := scenario.CreateScenarioAgentWithInputs()
-	fmt.Print(scenario)
+	scenario := scenario.CreateInitialisedScenarioAgent()
+
+	start := time.Now()
+	currentTime := 0.0
+	scenario.ScenarioActive = true
+
+	for scenario.ScenarioActive == true {
+		elapsed := float64((time.Since(start) / time.Microsecond) / 10000)
+		if elapsed != currentTime {
+			if int(elapsed/2400) < scenario.ScenarioDuration {
+				currentTime = elapsed
+				fmt.Println(elapsed)
+				scenario.PropagateTime(currentTime)
+			} else {
+				scenario.ScenarioActive = false
+			}
+		}
+	}
+
+	scenario.PrintResults()
 }
 
 /*func philos(id int, left, right chan bool, wg *sync.WaitGroup) {

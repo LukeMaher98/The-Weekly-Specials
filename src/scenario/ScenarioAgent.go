@@ -19,12 +19,19 @@ type ScenarioAgent struct {
 	arrivalUpperBound     int
 	firstShiftFloorStaff  int
 	secondShiftFloorStaff int
+	ScenarioDuration      int
+	ScenarioActive        bool
 	//store          storeAgent
 }
 
-// CreateScenarioAgentWithInputs defined scenario from CLI
-func CreateScenarioAgentWithInputs() ScenarioAgent {
-	newScenario := ScenarioAgent{}
+// CreateScenarioAgent : creates 'empty' Scenario for initialisation
+func CreateScenarioAgent() ScenarioAgent {
+	return ScenarioAgent{-1, -1.0, -1.0, -1.0, -1.0, 0, 0, 0, 0.0, 0.0, -1, -1, -1, -1, 0, false}
+}
+
+// CreateInitialisedScenarioAgent : creates populated Scenario for CLI
+func CreateInitialisedScenarioAgent() ScenarioAgent {
+	newScenario := CreateScenarioAgent()
 
 	fmt.Println("Scenario Variables")
 	fmt.Println("---------------------")
@@ -32,17 +39,35 @@ func CreateScenarioAgentWithInputs() ScenarioAgent {
 	read := true
 
 	for read {
-		if !(newScenario.startingDay >= 0 && newScenario.startingDay <= 6) {
-			startingDayTemp := 0
-			fmt.Print("Starting Day of Week [0-6]> ")
+		if !(newScenario.ScenarioDuration > 0) {
+			ScenarioDurationTemp := 0
+			fmt.Print("Duration of Simulation in Days [0-6]> ")
+			fmt.Scanln(&ScenarioDurationTemp)
+			fmt.Print("\n")
+			if ScenarioDurationTemp > 0 {
+				newScenario.ScenarioDuration = ScenarioDurationTemp
+			}
+			continue
+		} else if !(newScenario.startingDay >= 0 && newScenario.startingDay <= 6) {
+			startingDayTemp := -1
+			fmt.Print("Starting Day of Week for Simulation [0-6]> ")
 			fmt.Scanln(&startingDayTemp)
 			fmt.Print("\n")
 			if startingDayTemp >= 0 && startingDayTemp <= 6 {
 				newScenario.startingDay = startingDayTemp
 			}
 			continue
+		} else if !(newScenario.startingTime >= 0.0 && newScenario.startingTime <= 24.0) {
+			startingTimeTemp := -1.0
+			fmt.Print("Starting Time of Day for Simulation [0.0-24.0]> ")
+			fmt.Scanln(&startingTimeTemp)
+			fmt.Print("\n")
+			if startingTimeTemp >= 0.0 && startingTimeTemp <= 24.0 {
+				newScenario.startingTime = startingTimeTemp
+			}
+			continue
 		} else if !(newScenario.openingTime >= 0.0 && newScenario.openingTime <= 24.0) {
-			openingTimeTemp := 0.0
+			openingTimeTemp := -1.0
 			fmt.Print("Opening Time [0.0-24.0]> ")
 			fmt.Scanln(&openingTimeTemp)
 			fmt.Print("\n")
@@ -51,7 +76,7 @@ func CreateScenarioAgentWithInputs() ScenarioAgent {
 			}
 			continue
 		} else if !(newScenario.closingTime >= newScenario.itemTimeLowerBound && newScenario.closingTime <= 24.0) {
-			closingTimeTemp := 0.0
+			closingTimeTemp := -1.0
 			fmt.Printf("Closing Time [%v-24.0]> ", newScenario.openingTime)
 			fmt.Scanln(&closingTimeTemp)
 			fmt.Print("\n")
@@ -79,7 +104,7 @@ func CreateScenarioAgentWithInputs() ScenarioAgent {
 			continue
 		} else if !(newScenario.productsUpperBound >= newScenario.productsLowerBound && newScenario.productsUpperBound <= 200) {
 			productsUpperBoundTemp := 0
-			fmt.Printf("Products per Customer Upper Bound [%d-200]> ", newScenario.productsLowerBound)
+			fmt.Printf("Products per Customer Upper Bound [%v-200]> ", newScenario.productsLowerBound)
 			fmt.Scanln(&productsUpperBoundTemp)
 			fmt.Print("\n")
 			if productsUpperBoundTemp >= newScenario.productsLowerBound && productsUpperBoundTemp <= 200 {
@@ -121,15 +146,42 @@ func CreateScenarioAgentWithInputs() ScenarioAgent {
 			if arrivalUpperBoundTemp >= newScenario.arrivalLowerBound && arrivalUpperBoundTemp <= 60 {
 				newScenario.arrivalUpperBound = arrivalUpperBoundTemp
 			}
+		} else if !(newScenario.firstShiftFloorStaff >= 0) {
+			firstShiftFloorStaffTemp := -1
+			fmt.Print("Number of Floor Staff [First Shift] [0+]> ")
+			fmt.Scanln(&firstShiftFloorStaffTemp)
+			fmt.Print("\n")
+			if firstShiftFloorStaffTemp >= 0 {
+				newScenario.firstShiftFloorStaff = firstShiftFloorStaffTemp
+			}
+			continue
+		} else if !(newScenario.secondShiftFloorStaff >= 0) {
+			secondShiftFloorStaffTemp := -1
+			fmt.Print("Number of Floor Staff [Second Shift] [0+]> ")
+			fmt.Scanln(&secondShiftFloorStaffTemp)
+			fmt.Print("\n")
+			if secondShiftFloorStaffTemp >= 0 {
+				newScenario.secondShiftFloorStaff = secondShiftFloorStaffTemp
+			}
+			continue
+		} else {
+			read = false
 		}
 	}
 
 	return newScenario
 }
 
-func (s ScenarioAgent) propagateTime(currentTime float64) {
-	//s.startingTime = time.Now()
-	//s.store.propagateTime(currentTime)
+// PropagateTime : propagates time through simulation
+func (s ScenarioAgent) PropagateTime(elapsedTime float64) {
+	//s.store.propagateTime(elapsedTime)
+}
+
+// PrintResults : prints results of simulation
+func (s ScenarioAgent) PrintResults() {
+	fmt.Println("Scenario Results:")
+	fmt.Println("------------------")
+	//...
 }
 
 /*func philos(id int, left, right chan bool, wg *sync.WaitGroup) {
