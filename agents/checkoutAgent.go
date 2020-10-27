@@ -22,28 +22,26 @@ func ConstructorCheckout (self, adult bool) (checkoutAgent) {
 }
 
 // Getter for selfCheckout 
-func IsSelfCheckout(co checkoutAgent) (bool) {
+func (co *checkoutAgent) IsSelfCheckout() (bool) {
 	return co.selfCheckout
 }
 
 // Getter for adultCheckout 
-func IsAdultCheckout(co checkoutAgent) (bool) {
+func (co *checkoutAgent) IsAdultCheckout() (bool) {
 	return co.adultCheckout
 }
 
 // Add money of an item to the checkout
-func AddMoney(co checkoutAgent, price float64) (checkoutAgent) {
+func (co *checkoutAgent) AddMoney(price float64) {
 	co.totalMoney += price
-	return co
 }
 
 // Get the money currently in the checkout
-func GetMoney(co checkoutAgent) (float64) {
+func (co *checkoutAgent) GetMoney() (float64) {
 	return co.totalMoney
 }
 
 // Set a new cashier to the checkout
-// func SetCashier (co checkoutAgent, cashier Cashier) (checkoutAgent) {
+// func (co *checkoutAgent) SetCashier (cashier Cashier) {
 // 	co.cashier = cashier
-// 	return co
 // }

@@ -29,14 +29,13 @@ func ConstructorFloorStaff (cleaningTime, diligenceFactor, baseHelpfulness float
 }
 
 // Getter for staff occupied status
-func GetOccupied (staff floorStaff) (bool) {
+func (staff *floorStaff) GetOccupied() (bool) {
 	return staff.occupied
 }
 
 // Setter for staff occupied status
-func SetOccupied (staff floorStaff) (floorStaff) {
-	staff.occupied = true
-	return staff
+func (staff *floorStaff) SetOccupied(val bool) {
+	staff.occupied = val
 }
 
 // Dynamically calculate the actual helpfulness of the floor agent
@@ -45,7 +44,7 @@ func calcActualHelpfulness (diligenceFactor, baseHelpfulness float64) (float64) 
 }
 
 // Print floor agent variables 
-func PrintStaff (staff floorStaff) {
+func (staff *floorStaff) PrintStaff() {
 	var ct = staff.cleaningTime
 	var df = staff.diligenceFactor
 	var bh = staff.baseHelpfulness
