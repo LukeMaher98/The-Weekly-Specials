@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"src/scenario"
-	"time"
+	"src/cashier"
 )
 
 func main() {
-	scenario := scenario.CreateInitialisedScenarioAgent()
+	/*scenario := scenario.CreateInitialisedScenarioAgent()
 
 	start := time.Now()
 	currentTime := 0.0
@@ -26,7 +25,11 @@ func main() {
 		}
 	}
 
-	scenario.PrintResults()
+	scenario.PrintResults()*/
+
+	cashier := cashier.NewCashier()
+	fmt.Println(cashier)
+	fmt.Println(cashier.ActualTimeCard)
 }
 
 /*func philos(id int, left, right chan bool, wg *sync.WaitGroup) {
