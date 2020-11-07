@@ -1,51 +1,61 @@
-package main
+package customer
 
 import (
-	"fmt"
-	item "src/customer/item"
+	"math"
+	"math/rand"
+	"src/item"
+	"time"
 )
 
 type CustomerAgent struct {
-	items            []item.ItemAgent
-	impairmentFactor float64
-	/* replaceItem             float64
-	couponItem              float64
-	withChildren            bool
-	loyaltyCard             bool
-	baseAmicability         float64
-	customerAmicability     float64
-	preferredPayment        float64
-	avaliablePayment        []int
+	items               []item.ItemAgent
+	impairmentFactor    float64
+	replaceItem         float64
+	couponItem          float64
+	withChildren        bool
+	loyaltyCard         bool
+	baseAmicability     float64
+	customerAmicability float64
+	preferredPayment    float64
+	//avaliablePayment        []int
 	baggintTimeSelfCheckout float64
 	emergencyLeave          float64
-	switchLine              float64 */
+	switchLine              float64
 }
 
-func newCustomer(items []item.ItemAgent, impairmentFactor float64) *CustomerAgent {
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	ca := CustomerAgent{impairmentFactor: impairmentFactor}
+func NewCustomer() *CustomerAgent {
+	ca := CustomerAgent{}
+
+	//float values
+	ca.impairmentFactor = math.Round((r.Float64()*1)*100) / 100
+	ca.replaceItem = math.Round((r.Float64()*1)*100) / 100
+	ca.couponItem = math.Round((r.Float64()*1)*100) / 100
+	ca.baseAmicability = math.Round((r.Float64()*0.74)+0.25*100) / 100
+	ca.customerAmicability = math.Round((r.Float64()*1)*100) / 100
+	ca.preferredPayment = math.Round((r.Float64()*2)*100) / 100
+	ca.baggintTimeSelfCheckout = math.Round((r.Float64()*1)*100) / 100
+	ca.emergencyLeave = math.Round((r.Float64()*1)*100) / 100
+	ca.switchLine = math.Round((r.Float64()*1)*100) / 100
+
+	//bool values
+	ca.withChildren = (r.Intn(2) == 1)
+	ca.loyaltyCard = (r.Intn(2) == 1)
+
+	//generate items
+	ca.items = generateTrolley()
+
 	return &ca
 }
 
-func (customer *CustomerAgent) AddItem(item item.ItemAgent) {
-	customer.items = append(customer.items, item)
-}
+func generateTrolley() []item.ItemAgent {
+	var trolley []item.ItemAgent
+	var trolleyLimit = r.Intn(100) + 1
 
-func main() {
-	item1 := *item.NewItem(false, 7.9)
-	item2 := *item.NewItem(true, 20.0)
-	item3 := *item.NewItem(false, 100.50)
-	var s []item.ItemAgent
+	for i := 0; i < trolleyLimit; i++ {
+		trolley = append(trolley, *item.NewItem())
+	}
 
-	customer1 := newCustomer(s, 60.0)
-	customer1.AddItem(item1)
-	customer1.AddItem(item2)
-	customer1.AddItem(item3)
-	fmt.Println(*customer1)
-	printSlice(customer1.items)
-
-}
-
-func printSlice(s []item.ItemAgent) {
-	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
+	return trolley
 }
