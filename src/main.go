@@ -2,17 +2,11 @@ package main
 
 import (
 	"fmt"
-	"src/customer"
 	"src/scenario"
 	"time"
 )
 
 func main() {
-
-	//this line is for people to pull changes and test it works, will be removed before commit
-	customer := customer.NewCustomer()
-	fmt.Println(*customer)
-
 	scenario := scenario.CreateInitialisedScenarioAgent()
 
 	start := time.Now()
