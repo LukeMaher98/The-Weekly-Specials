@@ -41,7 +41,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 	for read {
 		if !(newScenario.ScenarioDuration > 0) {
 			ScenarioDurationTemp := 0
-			fmt.Print("Duration of Simulation in Days [0-6]> ")
+			fmt.Print("Duration of Simulation in Days [1+]> ")
 			fmt.Scanln(&ScenarioDurationTemp)
 			fmt.Print("\n")
 			if ScenarioDurationTemp > 0 {

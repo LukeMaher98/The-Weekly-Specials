@@ -16,9 +16,9 @@ func main() {
 	for scenario.ScenarioActive == true {
 		elapsed := float64((time.Since(start) / time.Microsecond) / 10000)
 		if elapsed != currentTime {
-			if int(elapsed/2400) < scenario.ScenarioDuration {
+			fmt.Println(elapsed)
+			if int(elapsed/1440) < scenario.ScenarioDuration {
 				currentTime = elapsed
-				fmt.Println(elapsed)
 				scenario.PropagateTime(currentTime)
 			} else {
 				scenario.ScenarioActive = false
