@@ -19,16 +19,17 @@ type CashierAgent struct {
 	ActualTimeItem float64
 }
 
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 func NewCashier() CashierAgent {
-	rand.Seed(time.Now().UTC().UnixNano())
 	cashier := CashierAgent{}
 
-	cashier.cleaningTime = math.Round(((rand.Float64()*0.5)+0.25)*100) / 100
-	cashier.diligenceFactor = math.Round(((rand.Float64()*0.5)+0.25)*100) / 100
-	cashier.expedienceFactor = math.Round(((rand.Float64()*0.5)+0.25)*100) / 100
-	cashier.baseTimeCash = math.Round(((rand.Float64()*0.5)+0.25)*100) / 100
-	cashier.baseTimeCard = math.Round(((rand.Float64()*0.5)+0.25)*100) / 100
-	cashier.baseTimeItem = math.Round(((rand.Float64()*0.5)+0.25)*100) / 100
+	cashier.cleaningTime = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
+	cashier.diligenceFactor = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
+	cashier.expedienceFactor = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
+	cashier.baseTimeCash = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
+	cashier.baseTimeCard = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
+	cashier.baseTimeItem = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
 
 	cashier.ActualTimeCash = cashier.baseTimeCash
 	cashier.ActualTimeCard = cashier.baseTimeCard
