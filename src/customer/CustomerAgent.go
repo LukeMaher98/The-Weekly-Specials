@@ -21,6 +21,8 @@ type CustomerAgent struct {
 	baggintTimeSelfCheckout float64
 	emergencyLeave          float64
 	switchLine              float64
+	competence              float64
+	trolleyLimit            int
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -29,15 +31,17 @@ func NewCustomer() *CustomerAgent {
 	ca := CustomerAgent{}
 
 	//float values
-	ca.impairmentFactor = math.Round((r.Float64()*1)*100) / 100
-	ca.replaceItem = math.Round((r.Float64()*1)*100) / 100
-	ca.couponItem = math.Round((r.Float64()*1)*100) / 100
-	ca.baseAmicability = math.Round((r.Float64()*0.74)+0.25*100) / 100
-	ca.customerAmicability = math.Round((r.Float64()*1)*100) / 100
+	ca.impairmentFactor = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
+	ca.replaceItem = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
+	ca.baseAmicability = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
+	ca.customerAmicability = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
 	ca.preferredPayment = math.Round((r.Float64()*2)*100) / 100
-	ca.baggintTimeSelfCheckout = math.Round((r.Float64()*1)*100) / 100
 	ca.emergencyLeave = math.Round((r.Float64()*1)*100) / 100
-	ca.switchLine = math.Round((r.Float64()*1)*100) / 100
+	ca.switchLine = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
+	ca.competence = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
+
+	//int values
+	ca.trolleyLimit = r.Intn(100) + 1
 
 	//bool values
 	ca.withChildren = (r.Intn(2) == 1)
