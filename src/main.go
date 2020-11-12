@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"src/scenario"
 	"time"
 )
@@ -11,45 +10,30 @@ func main() {
 
 	start := time.Now()
 	currentTime := 0.0
-	scenario.ScenarioActive = true
+
+	scenario.Activate()
 
 	for scenario.ScenarioActive == true {
 		elapsed := float64((time.Since(start) / time.Microsecond) / 10000)
 		if elapsed != currentTime {
-			fmt.Println(elapsed)
-			if int(elapsed/1440) < scenario.ScenarioDuration {
-				currentTime = elapsed
-				scenario.PropagateTime(currentTime)
-			} else {
-				scenario.ScenarioActive = false
-			}
+			currentTime = elapsed
+			scenario.PropagateTime(currentTime)
 		}
 	}
 
 	scenario.PrintResults()
 }
 
-/*func philos(id int, left, right chan bool, wg *sync.WaitGroup) {
-	fmt.Printf("Philosopher # %d wants to eat\n", id)
-	<-left
-	<-right
-	left <- true
-	right <- true
-	fmt.Printf("Philosopher # %d finished eating\n", id)
-	wg.Done()
-}
-func main() {
-	const numPhilos = 5
-	var forks [numPhilos]chan bool
-	for i := 0; i < numPhilos; i++ {
-		forks[i] = make(chan bool, 1)
-		forks[i] <- true
-	}
-	var wg sync.WaitGroup
-	for i := 0; i < numPhilos; i++ {
-		wg.Add(1)
-		go philos(i, forks[(i-1+numPhilos)%numPhilos], forks[(i+numPhilos)%numPhilos], &wg)
-	}
-	wg.Wait()
-	fmt.Println("Everybody finished eating")
-}*/
+// TO BE ADDRESSED
+
+// - 'Actual values', i.e. dynamically refined equivalents of base values, all comes as the output of functions and therefore do not require a dedicated
+//   attribute within the struct of their respective agent
+
+// - The number of checkouts is permanent over the course of the simulation, while the number of cashiers may vary. Therefore checkouts agenst should
+//   have their active cashier agent as an attribute, and not the inverse to allow for seemly time propagation
+
+// - All human-representative agent attributes relating to the effieciency with which a staff member does there job should be identified as 'Competance'.
+// Likewise all those that relate to how smoothly an a human-representative agent interacts with other such agents should be referred to as 'Amicability'.
+
+// - A time propogation function must be implemented for all agents, with internal agent data persisting through time iterations. At such a point, a sequential
+// implementation of the core simulation loop should be possible, following on from which the issue of comcurrency can be addressed.
