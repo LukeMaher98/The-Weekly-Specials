@@ -354,7 +354,7 @@ func (s *ScenarioAgent) PrintResults() {
 }
 
 func (s *ScenarioAgent) getEnvironmentalImpactOnArrival() float64 {
-	rawValue := (s.weatherConditions + s.socialConditions) / 4
+	rawValue := (s.weatherConditions + s.socialConditions) / 8
 	rawValue -= 0.05 * float64(s.covidLockdownLevel)
 	return rawValue
 }
