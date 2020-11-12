@@ -129,7 +129,7 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 			rawValue *= 1.05
 		}
 	}
-	rawValue += externalImpact * 100
+	rawValue *= (1 + externalImpact)
 	if rawValue < 0 {
 		rawValue = 0
 	} else if rawValue > 1 {
