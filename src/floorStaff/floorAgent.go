@@ -1,65 +1,50 @@
 package floorStaff
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
 )
 
 // Floor Staff agent struct
-type floorStaff struct {
- 	cleaningTime float64
-	diligenceFactor float64
-	baseHelpfulness float64
-	actualHelpfulness float64
-	occupied bool
+type FloorStaffAgent struct {
+ 	Amicability float64
+	Competance float64
+	Occupied bool
 }
 
-var x = rand.New(rand.NewSource(time.Now().UnixNano()))
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // Floor Staff agent constructor
-func NewFloorStaff () *floorStaff {
+func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) FloorStaffAgent {
 
 	// Create staff agent 
-	staff := floorStaff {}
+	staff := FloorStaffAgent {}
 
-	// Randomly initialised variables 
-	staff.cleaningTime = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
-	staff.diligenceFactor = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
-	staff.baseHelpfulness = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
-
-	// Dynamically defined variables 
-	staff.actualHelpfulness = calcActualHelpfulness(staff.diligenceFactor, staff.baseHelpfulness)
+	// Randomly initialised variables based on boundings
+	staff.Amicability = math.Round(((r.Float64()*(AmicUB-AmicLB))+AmicLB)*100) / 100
+	staff.Competance = math.Round(((r.Float64()*(CompUB-CompLB))+CompLB)*100) / 100
 
 	// Initialised False
-	staff.occupied = false
+	staff.Occupied = false
 
 	// Return staff object
-	return &staff
+	return staff
 }
 
-// Getter for staff occupied status
-func (staff *floorStaff) GetOccupied() (bool) {
-	return staff.occupied
-}
+// Placeholder stuff 
+func (fs *FloorStaffAgent) PropagateTime() {
+	// 50% chance to change occupied status
+	if r.Float64() < 0.5 {
+		fs.Occupied = !fs.Occupied
+	}
 
-// Setter for staff occupied status
-func (staff *floorStaff) SetOccupied(val bool) {
-	staff.occupied = val
-}
-
-// Dynamically calculate the actual helpfulness of the floor agent
-func calcActualHelpfulness (diligenceFactor, baseHelpfulness float64) (float64) {
-	return ((diligenceFactor + baseHelpfulness) / 2)
-}
-
-// Print floor agent variables 
-func (staff *floorStaff) PrintStaff() {
-	var ct = staff.cleaningTime
-	var df = staff.diligenceFactor
-	var bh = staff.baseHelpfulness
-	var ah = staff.actualHelpfulness
-	var os = staff.occupied
-	fmt.Printf("Cleaning Time:%.2f, Diligence Factor:%.2f, Base Helpfulness:%.2f, Actual Helpfulness:%.2f, Occupied Status:%t\n", ct, df, bh, ah, os)
+	// Placeholder example 
+	if fs.Occupied {
+		fs.Amicability += 0.001
+		fs.Competance += 0.001
+	} else {
+		fs.Amicability -= 0.001
+		fs.Competance -= 0.001
+	}
 }

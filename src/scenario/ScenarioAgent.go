@@ -337,8 +337,9 @@ func (s *ScenarioAgent) PropagateTime(elapsedTime float64) {
 	} else {
 		s.currentShift = 0
 	}
-
-	/*fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: ", s.currentShift)*/
+	if math.Mod(s.currentTime, 60) == 0 {
+		fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: ", s.currentShift)
+	}
 
 	if int(elapsedTime/1440) >= s.ScenarioDuration {
 		s.ScenarioActive = false

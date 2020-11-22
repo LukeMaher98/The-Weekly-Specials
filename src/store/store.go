@@ -1,14 +1,14 @@
 package store
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"src/constants"
 	"time"
-	// "src/checkout"
+
 	// "src/cashier"
-	// "src/floorStaff"
+	"src/checkout"
+	"src/floorStaff"
 	// "src/floorManager"
 	// "src/item"
 	// "src/customer"
@@ -22,10 +22,9 @@ type StoreAgent struct {
 
 	//CustomersOnFloor        []customer.CustomerAgent
 	//CustomersQueues         [][]customer.CustomerAgent
-	//FloorStaffFirstShift    []floorStaff.FloorStaffAgent
-	//FloorStaffSecondShift   []floorStaff.FloorStaffAgent
-	//CheckoutFirstShift      []checkout.CheckoutAgent
-	//CheckoutSecondShift     []checkout.CheckoutAgent
+	FloorStaffFirstShift   	 []floorStaff.FloorStaffAgent
+	FloorStaffSecondShift  	 []floorStaff.FloorStaffAgent
+	Checkouts 			     []checkout.CheckoutAgent
 	//FloorManagerFirstShift  floorManager.FloorManagerAgent
 	//FloorManagerSecondShift floorManager.FloorManagerAgent
 }
@@ -39,10 +38,9 @@ func CreateStoreAgent() StoreAgent {
 		0,
 		//[]CustomerAgent{},
 		//[][]CustomerAgent{},
-		//[]FloorStaffAgent{},
-		//[]FloorStaffAgent{},
-		//[]CheckoutAgent{},
-		//[]CheckoutAgent{},
+		[]floorStaff.FloorStaffAgent{},
+		[]floorStaff.FloorStaffAgent{},
+		[]checkout.CheckoutAgent{},
 		//FloorManagerAgent,
 		//FloorManagerAgent
 	}
@@ -62,7 +60,7 @@ func CreateInitialisedStoreAgent(
 
 	for i := 0; i < checkoutCount; i++ {
 		//newStore.CustomerQueues = append(newStore.CustomerQueues, []CustomerAgent{})
-		//newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent())
+		newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent())
 	}
 
 	for i := 0; i < cashierShifts.FirstShiftCount; i++ {
@@ -74,11 +72,13 @@ func CreateInitialisedStoreAgent(
 	}
 
 	for i := 0; i < floorStaffShifts.FirstShiftCount; i++ {
-		//newStore.FloorStaffFirstShift = append(newStore.FloorStaffFirstShift, floorStaff.CreateInitialisedFloorStaffAgent( ... ))
+		newStore.FloorStaffFirstShift = append(newStore.FloorStaffFirstShift, floorStaff.CreateInitialisedFloorStaffAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+			floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound))
 	}
 
 	for i := 0; i < floorStaffShifts.SecondShiftCount; i++ {
-		//newStore.FloorStaffFirstShift = append(newStore.FloorStaffFirstShift, floorStaff.CreateInitialisedFloorStaffAgent( ... ))
+		newStore.FloorStaffSecondShift = append(newStore.FloorStaffSecondShift, floorStaff.CreateInitialisedFloorStaffAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+			floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound))
 	}
 
 	//newStore.FloorManagerFirstShift = floorManager.CreateInitialisedFloorManagerAgent( ... )
@@ -94,11 +94,19 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
-	fmt.Println("current arrival rate: ", getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
+	if math.Mod(currentTime, 60) == 0 {
+		// fmt.Println("current arrival rate: ", getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
+		// fmt.Println("First Shift Floor Staff:", s.FloorStaffFirstShift)
+		// fmt.Println("Second Shift Floor Staff:", s.FloorStaffSecondShift)
+		// for i := 0; i < len(s.Checkouts); i++{
+		// 	fmt.Printf("Checkout %d Total: %f\n", i, s.Checkouts[i].TotalMoney)
+		// }
+
+	}
 	//s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
 	//s.checkCustomersReadyToQueue()
-	//s.propagateConcurrentCheckouts(currentShift) //customers and checkout/cashiers
-	//s.propagateStoreFloor(currentShift) // customer and floor staff and floor manager
+	s.propagateConcurrentCheckouts(currentShift) //customers and checkout/cashiers
+	s.propagateStoreFloor(currentShift) // customer and floor staff and floor manager
 }
 
 func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, externalImpact float64) float64 {
@@ -147,9 +155,39 @@ func (s *StoreAgent) checkCustomersReadyToQueue() {
 }
 
 func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int) {
-	//...
+
+	switch true {
+	case currentShift == 1:
+		for i := 0; i < len(s.Checkouts); i++ {
+			s.Checkouts[i].PropagateTime()
+		}
+		break
+	case currentShift == 2:
+		for i := 0; i < len(s.Checkouts); i++ {
+			s.Checkouts[i].PropagateTime()
+		}
+		break
+	case currentShift == 0:
+		break
+	}
+
 }
 
 func (s *StoreAgent) propagateStoreFloor(currentShift int) {
-	//...
+	
+	switch true {
+	case currentShift == 1:
+		for i := 0; i < len(s.FloorStaffFirstShift); i++ {
+			s.FloorStaffFirstShift[i].PropagateTime()
+		}
+		break
+	case currentShift == 2:
+		for i := 0; i < len(s.FloorStaffSecondShift); i++ {
+			s.FloorStaffSecondShift[i].PropagateTime()
+		}
+		break
+	case currentShift == 0:
+		break
+	}
+
 }

@@ -1,50 +1,44 @@
-package agents
+package checkout
 
 import (
 	"math"
 	"math/rand"
+	"src/cashier"
 	"time"
 )
 
-type checkoutAgent struct {
-	selfCheckout bool
-	adultCheckout bool 
-	assistanceWaitTime float64
-	totalMoney float64
-	// currentCashier cashier
+type CheckoutAgent struct {
+	SelfCheckout bool
+	AdultCheckout bool 
+	AssistanceWaitTime float64
+	TotalMoney float64
+	FirstShiftCashier cashier.CashierAgent
+	SecondShiftCashier cashier.CashierAgent
 }
 
-var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+var t = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // checkout agent constructor 
-func NewCheckout () *checkoutAgent {
-	co := checkoutAgent {}
+func CreateInitialisedCheckoutAgent() CheckoutAgent {
+	co := CheckoutAgent{}
 
 	// Randomly Initialised Variables
-	co.selfCheckout = (r.Intn(2) == 1)
-	co.adultCheckout = (r.Intn(2) == 1)
-	co.assistanceWaitTime = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
-	co.totalMoney = 0
-
-	return &co
+	co.SelfCheckout = false
+	co.AdultCheckout = (t.Intn(2) == 1)
+	co.AssistanceWaitTime = math.Round(((t.Float64()*(0.75-0.25))+0.25)*100) / 100
+	co.TotalMoney = 0
+	co.FirstShiftCashier = cashier.CashierAgent{}
+	co.SecondShiftCashier = cashier.CashierAgent{}
+	
+	return co
 }
 
-// Getter for selfCheckout 
-func (co *checkoutAgent) IsSelfCheckout() (bool) {
-	return co.selfCheckout
-}
+func (co *CheckoutAgent) PropagateTime() {
+	// I presume item handling and such will be handled mostly by the cashier and here is only for record keeping and spillage chances?
+	// Placeholder stuff, 1/1000 chance of spillage and do nothing on that occurence 
+	if t.Float64() < 0.001 {
 
-// Getter for adultCheckout 
-func (co *checkoutAgent) IsAdultCheckout() (bool) {
-	return co.adultCheckout
-}
-
-// Add money of an item to the checkout
-func (co *checkoutAgent) AddMoney(price float64) {
-	co.totalMoney += price
-}
-
-// Get the money currently in the checkout
-func (co *checkoutAgent) GetMoney() (float64) {
-	return co.totalMoney
+	} else {
+		co.TotalMoney += t.Float64()
+	}
 }
