@@ -11,7 +11,7 @@ import (
 	// "src/floorStaff"
 	// "src/floorManager"
 	// "src/item"
-	// "src/customer"
+	"src/customer"
 )
 
 type StoreAgent struct {
@@ -20,8 +20,8 @@ type StoreAgent struct {
 	statusRemainingTime float64
 	storeTempStatus     int
 
-	//CustomersOnFloor        []customer.CustomerAgent
-	//CustomersQueues         [][]customer.CustomerAgent
+	CustomersOnFloor        []customer.CustomerAgent
+	CustomersQueues         [][]customer.CustomerAgent
 	//FloorStaffFirstShift    []floorStaff.FloorStaffAgent
 	//FloorStaffSecondShift   []floorStaff.FloorStaffAgent
 	//CheckoutFirstShift      []checkout.CheckoutAgent
@@ -37,8 +37,8 @@ func CreateStoreAgent() StoreAgent {
 		0.0,
 		0.0,
 		0,
-		//[]CustomerAgent{},
-		//[][]CustomerAgent{},
+		[]CustomerAgent{},
+		[][]CustomerAgent{},
 		//[]FloorStaffAgent{},
 		//[]FloorStaffAgent{},
 		//[]CheckoutAgent{},

@@ -8,19 +8,18 @@ import (
 )
 
 type ItemAgent struct {
-	eighteenPlus bool
-	price        float64
-	handling     float64
+	EighteenPlus bool
+	Price        float64
+	Handling     float64
 }
 
-var r = rand.New(rand.NewSource(time.Now().UnixNano()))
-
 func NewItem() *ItemAgent {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	ia := ItemAgent{}
 
-	ia.eighteenPlus = (r.Intn(2) == 1)
-	ia.price = math.Round((r.Float64()*10)*100) / 100
-	ia.handling = math.Round((r.Float64()*0.25)*100) / 100
+	ia.EighteenPlus = (r.Intn(2) == 1)
+	ia.Price = math.Round((r.Float64()*10)*100) / 100
+	ia.Handling = math.Round((r.Float64()*0.25)*100) / 100
 
 	return &ia
 }
