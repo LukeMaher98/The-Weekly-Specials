@@ -27,7 +27,7 @@ type CustomerAgent struct {
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func NewCustomer() *CustomerAgent {
+func NewCustomer() CustomerAgent {
 	ca := CustomerAgent{}
 
 	//float values
@@ -50,7 +50,7 @@ func NewCustomer() *CustomerAgent {
 	//generate items
 	ca.items = generateTrolley()
 
-	return &ca
+	return ca
 }
 
 func generateTrolley() []item.ItemAgent {
