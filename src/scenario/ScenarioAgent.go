@@ -325,25 +325,29 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 }
 
 // PropagateTime : propagates time through simulation
-func (s *ScenarioAgent) PropagateTime(elapsedTime float64) {
+func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
+	closedTime := 1440 - (s.closingTime*60 - s.openingTime*60)
+	elapsedTime := elapsed + 1
+
 	s.currentDay = ((int(elapsedTime+s.startingTime*60) / 1440) + s.startingDay) % 7
 	s.currentTime = math.Mod((elapsedTime + s.startingTime*60), 1440.0)
 	if s.currentTime >= s.openingTime*60 && s.currentTime <= s.closingTime*60 {
 		if s.currentTime < (s.openingTime*60 + ((s.closingTime - s.openingTime) * 30)) {
-			s.currentShift = 1
+			s.store.PropagateTime(0, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
+			fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 0")
 		} else {
-			s.currentShift = 2
+			s.store.PropagateTime(1, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
+			fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
 		}
 	} else {
-		s.currentShift = 0
+		elapsedTime += closedTime - 1
 	}
-
-	/*fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: ", s.currentShift)*/
 
 	if int(elapsedTime/1440) >= s.ScenarioDuration {
 		s.ScenarioActive = false
 	}
-	s.store.PropagateTime(s.currentShift, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
+
+	return elapsedTime
 }
 
 // PrintResults : prints results of simulation
