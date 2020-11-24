@@ -1,50 +1,48 @@
 package store
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
+	"src/checkout"
 	"src/constants"
+	"src/floorStaff"
+	"src/manager"
 	"time"
-	// "src/checkout"
-	// "src/cashier"
-	// "src/floorStaff"
-	// "src/floorManager"
+
 	// "src/item"
 	"src/customer"
 )
 
 type StoreAgent struct {
-	baseArrivalRate     float64
-	baseInconvenience   float64
-	statusRemainingTime float64
-	storeTempStatus     int
-
-	CustomersOnFloor        []customer.CustomerAgent
-	CustomersQueues         [][]customer.CustomerAgent
-	//FloorStaffFirstShift    []floorStaff.FloorStaffAgent
-	//FloorStaffSecondShift   []floorStaff.FloorStaffAgent
-	//CheckoutFirstShift      []checkout.CheckoutAgent
-	//CheckoutSecondShift     []checkout.CheckoutAgent
-	//FloorManagerFirstShift  floorManager.FloorManagerAgent
-	//FloorManagerSecondShift floorManager.FloorManagerAgent
+	baseArrivalRate       float64
+	baseInconvenience     float64
+	statusRemainingTime   float64
+	storeTempStatus       int
+	CustomersOnFloor      []customer.CustomerAgent
+	CustomersReadyToQueue []customer.CustomerAgent
+	CustomerQueues        [][]customer.CustomerAgent
+	FloorStaffFirstShift  []floorStaff.FloorStaff
+	FloorStaffSecondShift []floorStaff.FloorStaff
+	Checkouts             []checkout.CheckoutAgent
+	ManagerFirstShift     manager.ManagerAgent
+	ManagerSecondShift    manager.ManagerAgent
 }
 
-// CreateScenarioAgent : creates 'empty' Scenario for initialisation
+// CreateStoreAgent : creates 'empty' Scenario for initialisation
 func CreateStoreAgent() StoreAgent {
 	return StoreAgent{
 		0.0,
 		0.0,
 		0.0,
 		0,
-		[]CustomerAgent{},
-		[][]CustomerAgent{},
-		//[]FloorStaffAgent{},
-		//[]FloorStaffAgent{},
-		//[]CheckoutAgent{},
-		//[]CheckoutAgent{},
-		//FloorManagerAgent,
-		//FloorManagerAgent
+		[]customer.CustomerAgent{},
+		[]customer.CustomerAgent{},
+		[][]customer.CustomerAgent{},
+		[]floorStaff.FloorStaff{},
+		[]floorStaff.FloorStaff{},
+		[]checkout.CheckoutAgent{},
+		manager.ManagerAgent{},
+		manager.ManagerAgent{},
 	}
 }
 
@@ -78,7 +76,7 @@ func CreateInitialisedStoreAgent(
 	}
 
 	for i := 0; i < floorStaffShifts.SecondShiftCount; i++ {
-		//newStore.FloorStaffFirstShift = append(newStore.FloorStaffFirstShift, floorStaff.CreateInitialisedFloorStaffAgent( ... ))
+		//newStore.FloorStaffSecondShift = append(newStore.FloorStaffSecondShift, floorStaff.CreateInitialisedFloorStaffAgent( ... ))
 	}
 
 	//newStore.FloorManagerFirstShift = floorManager.CreateInitialisedFloorManagerAgent( ... )
@@ -94,11 +92,10 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
-	fmt.Println("current arrival rate: ", getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
-	//s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
-	//s.checkCustomersReadyToQueue()
-	//s.propagateConcurrentCheckouts(currentShift) //customers and checkout/cashiers
-	//s.propagateStoreFloor(currentShift) // customer and floor staff and floor manager
+	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
+	s.propagateStore(currentShift)
+	s.propagateCustomerQueues(currentShift)
+	s.propagateConcurrentCheckouts(currentShift)
 }
 
 func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, externalImpact float64) float64 {
@@ -139,17 +136,79 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 }
 
 func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
-	//...
+	rand.Seed(time.Now().UnixNano())
+	if rand.Float64()*1.0 < rateOfArrival {
+		s.CustomersOnFloor = append(s.CustomersOnFloor, customer.NewCustomer())
+	}
 }
 
-func (s *StoreAgent) checkCustomersReadyToQueue() {
-	//...
+func (s *StoreAgent) propagateCustomerQueues(currentShift int) {
+	/*for index, customer := range s.CustomersOnFloor {
+		if customer.IsFinishedShopping() {
+			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customer)
+			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:])
+		}
+	}*/
+
+	openCheckoutNum := 0
+
+	/*for _, checkout := range s.Checkouts {
+		if checkout.IsManned(currentShift) {
+			openCheckoutNum++
+		}
+	}*/
+
+	queueLengths := s.getQueueLengths()
+
+	if len(queueLengths) > openCheckoutNum {
+		for i := openCheckoutNum; i < len(queueLengths); i++ {
+			for _, customer := range s.CustomerQueues[i] {
+				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customer)
+			}
+			s.CustomerQueues = append(s.CustomerQueues[:i], s.CustomerQueues[i+1:]...)
+		}
+	} else if len(queueLengths) < openCheckoutNum {
+		for i := len(queueLengths); i < openCheckoutNum; i++ {
+			s.CustomerQueues = append(s.CustomerQueues, []customer.CustomerAgent{})
+		}
+	}
+
+	/*for index, customer := range s.CustomersReadyToQueue {
+		s.CustomerQueues[customer.SelectQueue(queueLengths)] = append(s.CustomerQueues[customer.SelectQueue(queueLengths)], customer)
+		s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
+	}*/
 }
 
 func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int) {
 	//...
 }
 
-func (s *StoreAgent) propagateStoreFloor(currentShift int) {
-	//...
+func (s *StoreAgent) propagateStore(currentShift int) {
+	/*for _, customer := range s.CustomersOnFloor {
+		customer.PropagateTime()
+	}*/
+
+	if currentShift == 0 {
+		/*for _, staff := range s.FloorStaffFirstShift {
+			staff.PropagateTime()
+		}
+		s.ManagerFirstShift.PropagateTime()*/
+	} else {
+		/*for _, staff := range s.FloorStaffSecondShift {
+			staff.PropagateTime()
+		}
+		s.ManagerSecondShift.PropagateTime()*/
+	}
+
+	/*for _, checkout := range s.Checkouts {
+		checkout.PropagateTime()
+	}*/
+}
+
+func (s *StoreAgent) getQueueLengths() []int {
+	queueLengths := []int{}
+	for _, queue := range s.CustomerQueues {
+		queueLengths = append(queueLengths, len(queue))
+	}
+	return queueLengths
 }

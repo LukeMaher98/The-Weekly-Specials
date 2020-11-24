@@ -1,4 +1,4 @@
-package agents
+package checkout
 
 import (
 	"math"
@@ -6,19 +6,19 @@ import (
 	"time"
 )
 
-type checkoutAgent struct {
-	selfCheckout bool
-	adultCheckout bool 
+type CheckoutAgent struct {
+	selfCheckout       bool
+	adultCheckout      bool
 	assistanceWaitTime float64
-	totalMoney float64
+	totalMoney         float64
 	// currentCashier cashier
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-// checkout agent constructor 
-func NewCheckout () *checkoutAgent {
-	co := checkoutAgent {}
+// checkout agent constructor
+func NewCheckout() *CheckoutAgent {
+	co := CheckoutAgent{}
 
 	// Randomly Initialised Variables
 	co.selfCheckout = (r.Intn(2) == 1)
@@ -29,22 +29,22 @@ func NewCheckout () *checkoutAgent {
 	return &co
 }
 
-// Getter for selfCheckout 
-func (co *checkoutAgent) IsSelfCheckout() (bool) {
+// Getter for selfCheckout
+func (co *CheckoutAgent) IsSelfCheckout() bool {
 	return co.selfCheckout
 }
 
-// Getter for adultCheckout 
-func (co *checkoutAgent) IsAdultCheckout() (bool) {
+// Getter for adultCheckout
+func (co *CheckoutAgent) IsAdultCheckout() bool {
 	return co.adultCheckout
 }
 
 // Add money of an item to the checkout
-func (co *checkoutAgent) AddMoney(price float64) {
+func (co *CheckoutAgent) AddMoney(price float64) {
 	co.totalMoney += price
 }
 
 // Get the money currently in the checkout
-func (co *checkoutAgent) GetMoney() (float64) {
+func (co *CheckoutAgent) GetMoney() float64 {
 	return co.totalMoney
 }

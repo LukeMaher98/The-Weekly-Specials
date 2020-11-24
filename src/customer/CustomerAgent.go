@@ -26,7 +26,9 @@ type CustomerAgent struct {
 	FinishedShop            bool
 }
 
-func NewCustomer() *CustomerAgent {
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func NewCustomer() CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -54,7 +56,7 @@ func NewCustomer() *CustomerAgent {
 	//discuss this
 	ca.FinishedShop = false
 
-	return &ca
+	return ca
 }
 
 func GenerateTrolley() []item.ItemAgent {
