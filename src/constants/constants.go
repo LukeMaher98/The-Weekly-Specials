@@ -1,5 +1,10 @@
 package constants
 
+import (
+	"src/customer"
+	"sync"
+)
+
 type StaffAttributeBounds struct {
 	AmicabilityUpperBound float64
 	AmicabilityLowerBound float64
@@ -20,4 +25,9 @@ type StoreAttributeBoundsFloat struct {
 type StoreShifts struct {
 	FirstShiftCount  int
 	SecondShiftCount int
+}
+
+type CustomerQueue struct {
+	Mutex sync.Mutex
+	Queue []customer.CustomerAgent
 }
