@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"src/constants"
-	"src/customer"
 	"src/store"
 	"strings"
 )
@@ -59,7 +58,6 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 
 	//Uncomment to check items
 	//item.PrintItems()
-	print(customer.GetValue())
 
 	fmt.Println("Scenario Variables")
 	fmt.Println("---------------------")

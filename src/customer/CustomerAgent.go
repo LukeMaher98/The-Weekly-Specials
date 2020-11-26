@@ -3,7 +3,6 @@ package customer
 import (
 	"math"
 	"math/rand"
-	"src/constants"
 	"src/floorStaff"
 	"src/item"
 	"time"
@@ -27,7 +26,7 @@ type CustomerAgent struct {
 	FloorStaffNearby     floorStaff.FloorStaff
 }
 
-func NewCustomer(itemBounds *constants.StoreAttributeBoundsInt) *CustomerAgent {
+func NewCustomer(UpperBound int, LowerBound int) *CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -40,7 +39,7 @@ func NewCustomer(itemBounds *constants.StoreAttributeBoundsInt) *CustomerAgent {
 	ca.WithChildren = (r.Intn(2) == 1)
 	ca.LoyaltyCard = (r.Intn(2) == 1)
 
-	ca.TrolleyLimit = r.Intn(itemBounds.UpperBound-itemBounds.LowerBound) + itemBounds.LowerBound
+	ca.TrolleyLimit = r.Intn(UpperBound-LowerBound) + LowerBound
 
 	//dynamic values
 	ca.EmergencyLeaveChance = 0.0
@@ -55,16 +54,12 @@ func NewCustomer(itemBounds *constants.StoreAttributeBoundsInt) *CustomerAgent {
 	return &ca
 }
 
-func GetValue() string {
-	return "Hello"
-}
-
-func PropagateTime(ca *CustomerAgent) {
+func (ca CustomerAgent) PropagateTime() {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	//Add item to trolley
 	if ca.CurrentTrolleyCount <= ca.TrolleyLimit {
-		addItemToTrolley(ca)
+		ca.addItemToTrolley()
 	} else {
 		ca.FinishedShop = true
 	}
@@ -85,7 +80,7 @@ func PropagateTime(ca *CustomerAgent) {
 
 }
 
-func SelectQueue(QueueLengths []int) int {
+func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	selectedQueue := 0
 	currentQueueLength := QueueLengths[0]
 
@@ -98,23 +93,23 @@ func SelectQueue(QueueLengths []int) int {
 	return selectedQueue
 }
 
-func IsFinishedShopping(ca *CustomerAgent) bool {
+func (ca CustomerAgent) IsFinishedShopping() bool {
 	return ca.FinishedShop
 }
 
-func IsJoingQueue(ca *CustomerAgent) {
+func (ca CustomerAgent) IsJoingQueue() {
 	ca.InQueue = true
 }
 
-func IsLeavingQueue(ca *CustomerAgent) bool {
+func (ca CustomerAgent) IsLeavingQueue() bool {
 	return ca.InQueue
 }
 
-func GetCustomerItems(ca *CustomerAgent) []item.ItemAgent {
+func (ca CustomerAgent) GetCustomerItems() []item.ItemAgent {
 	return ca.Items
 }
 
-func addItemToTrolley(ca *CustomerAgent) {
+func (ca *CustomerAgent) addItemToTrolley() {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	var itemSkipped = 0.0
 	var isImpaired = ((ca.ImpairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))

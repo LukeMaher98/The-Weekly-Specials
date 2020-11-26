@@ -26,12 +26,8 @@ type StoreAgent struct {
 	Checkouts             []checkout.CheckoutAgent
 	ManagerFirstShift     manager.ManagerAgent
 	ManagerSecondShift    manager.ManagerAgent
-<<<<<<< HEAD
-	itemLimitBounds       constants.StoreAttributeBoundsInt
-=======
 	ItemLimitBounds       constants.StoreAttributeBoundsInt
 	ItemTimeBounds        constants.StoreAttributeBoundsFloat
->>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 }
 
 // CreateStoreAgent : creates 'empty' Scenario for initialisation
@@ -50,10 +46,7 @@ func CreateStoreAgent() StoreAgent {
 		manager.ManagerAgent{},
 		manager.ManagerAgent{},
 		constants.StoreAttributeBoundsInt{},
-<<<<<<< HEAD
-=======
 		constants.StoreAttributeBoundsFloat{},
->>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 	}
 }
 
@@ -103,7 +96,6 @@ func CreateInitialisedStoreAgent(
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	arrivalRange := float64(arrivalRates.UpperBound - arrivalRates.LowerBound)
 	newStore.baseArrivalRate = math.Round((seed.Float64()*arrivalRange)+float64(arrivalRates.LowerBound)) / float64(60)
-	newStore.itemLimitBounds = itemLimitBounds
 
 	return newStore
 }
@@ -156,19 +148,15 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 	rand.Seed(time.Now().UnixNano())
 	if rand.Float64()*1.0 < rateOfArrival {
-<<<<<<< HEAD
-		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(&s.itemLimitBounds))
-=======
-		//s.CustomersOnFloor = append(s.CustomersOnFloor, customer.NewCustomer(s.ItemLimitBounds))
->>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
+		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound))
 	}
 }
 
 //customers need to be able to leave queues after they join .IsLeavingQueue()
 //in case they need to replace an item. chance during time propagation
 func (s *StoreAgent) propagateCustomerQueues(currentShift int) {
-	/*	for index, customers := range s.CustomersOnFloor {
-		if customer.IsFinishedShopping(&customers) {
+	/*	for index, customer := range s.CustomersOnFloor {
+		if customer.IsFinishedShopping() {
 			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customers)
 			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:])
 		}
@@ -198,17 +186,11 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int) {
 		}
 	}
 
-<<<<<<< HEAD
-	/*for index, customers := range s.CustomersReadyToQueue {
-		customer.IsJoingQueue(&customers)
-		s.CustomerQueues[customer.SelectQueue(queueLengths)] = append(s.CustomerQueues[customer.SelectQueue(queueLengths)], customer)
-=======
 	/*for index, customer := range s.CustomersReadyToQueue {
-		queueIndex = customer.SelectQueue(queueLengths)
+		queueIndex := customer.SelectQueue(queueLengths)
 		s.CustomerQueues[queueIndex].Mutex.Lock()
 		s.CustomerQueues[queueIndex].Queue = append(s.CustomerQueues[queueIndex].Queue, customer)
 		s.CustomerQueues[queueIndex].Mutex.Unlock()
->>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 		s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
 	}*/
 }
@@ -230,8 +212,8 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int) {
 }
 
 func (s *StoreAgent) propagateStore(currentShift int) {
-	/*for _, customers := range s.CustomersOnFloor {
-		customer.PropagateTime(&customers)
+	/*	for _, customer := range s.CustomersOnFloor {
+		customer.PropagateTime()
 	}*/
 
 	if currentShift == 0 {
