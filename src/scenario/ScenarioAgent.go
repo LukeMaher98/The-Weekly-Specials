@@ -313,6 +313,8 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 
 	newScenario.store = store.CreateInitialisedStoreAgent(
 		newScenario.arrivalBounds,
+		newScenario.itemLimitBounds,
+		newScenario.itemTimeBounds,
 		newScenario.checkoutCount,
 		newScenario.cashierShifts,
 		newScenario.floorStaffShifts,
