@@ -143,6 +143,6 @@ func (ca *CustomerAgent) addItemToTrolley() {
 	itemSkipped = itemSkipped - helpedMultiplier
 
 	if itemSkipped < 0.75 {
-		ca.Items = append(ca.Items, *item.NewItem())
+		ca.Items = append(ca.Items, *item.NewItem(ca.ItemHandlingUpper, ca.ItemHandlingLower))
 	}
 }

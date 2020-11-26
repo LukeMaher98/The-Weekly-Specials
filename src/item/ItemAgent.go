@@ -39,6 +39,6 @@ func setAgeLimit() bool {
 //for testing
 func PrintItems() {
 	for i := 0; i < 10; i++ {
-		fmt.Println(*NewItem())
+		fmt.Println(*NewItem(55.0, 65.0))
 	}
 }
