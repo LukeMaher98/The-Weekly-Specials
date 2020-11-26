@@ -20,13 +20,18 @@ type StoreAgent struct {
 	storeTempStatus       int
 	CustomersOnFloor      []customer.CustomerAgent
 	CustomersReadyToQueue []customer.CustomerAgent
-	CustomerQueues        [][]customer.CustomerAgent
+	CustomerQueues        []constants.CustomerQueue
 	FloorStaffFirstShift  []floorStaff.FloorStaff
 	FloorStaffSecondShift []floorStaff.FloorStaff
 	Checkouts             []checkout.CheckoutAgent
 	ManagerFirstShift     manager.ManagerAgent
 	ManagerSecondShift    manager.ManagerAgent
+<<<<<<< HEAD
 	itemLimitBounds       constants.StoreAttributeBoundsInt
+=======
+	ItemLimitBounds       constants.StoreAttributeBoundsInt
+	ItemTimeBounds        constants.StoreAttributeBoundsFloat
+>>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 }
 
 // CreateStoreAgent : creates 'empty' Scenario for initialisation
@@ -38,19 +43,25 @@ func CreateStoreAgent() StoreAgent {
 		0,
 		[]customer.CustomerAgent{},
 		[]customer.CustomerAgent{},
-		[][]customer.CustomerAgent{},
+		[]constants.CustomerQueue{},
 		[]floorStaff.FloorStaff{},
 		[]floorStaff.FloorStaff{},
 		[]checkout.CheckoutAgent{},
 		manager.ManagerAgent{},
 		manager.ManagerAgent{},
 		constants.StoreAttributeBoundsInt{},
+<<<<<<< HEAD
+=======
+		constants.StoreAttributeBoundsFloat{},
+>>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 	}
 }
 
 // CreateInitialisedStoreAgent : populates store agent
 func CreateInitialisedStoreAgent(
 	arrivalRates constants.StoreAttributeBoundsInt,
+	itemLimits constants.StoreAttributeBoundsInt,
+	itemTimes constants.StoreAttributeBoundsFloat,
 	checkoutCount int,
 	cashierShifts constants.StoreShifts,
 	floorStaffShifts constants.StoreShifts,
@@ -61,12 +72,15 @@ func CreateInitialisedStoreAgent(
 ) StoreAgent {
 	newStore := CreateStoreAgent()
 
+	newStore.ItemLimitBounds = itemLimits
+	newStore.ItemTimeBounds = itemTimes
+
 	for i := 0; i < checkoutCount; i++ {
-		//newStore.CustomerQueues = append(newStore.CustomerQueues, []CustomerAgent{})
 		//newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent())
 	}
 
 	for i := 0; i < cashierShifts.FirstShiftCount; i++ {
+		//newStore.CustomerQueues = append(newStore.CustomerQueues, constants.CustomerQueue{})
 		//newStore.Checkouts[i].FirstShiftCashier = cashier.CreateInitialisedCashierAgent( ... )
 	}
 
@@ -96,10 +110,10 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
-	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
-	s.propagateStore(currentShift)
-	s.propagateCustomerQueues(currentShift)
-	s.propagateConcurrentCheckouts(currentShift)
+	/*go?*/ s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
+	/*go?*/ s.propagateStore(currentShift)
+	/*go?*/ s.propagateCustomerQueues(currentShift)
+	/*go?*/ s.propagateConcurrentCheckouts(currentShift)
 }
 
 func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, externalImpact float64) float64 {
@@ -142,7 +156,11 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 	rand.Seed(time.Now().UnixNano())
 	if rand.Float64()*1.0 < rateOfArrival {
+<<<<<<< HEAD
 		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(&s.itemLimitBounds))
+=======
+		//s.CustomersOnFloor = append(s.CustomersOnFloor, customer.NewCustomer(s.ItemLimitBounds))
+>>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 	}
 }
 
@@ -168,26 +186,47 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int) {
 
 	if len(queueLengths) > openCheckoutNum {
 		for i := openCheckoutNum; i < len(queueLengths); i++ {
-			for _, customer := range s.CustomerQueues[i] {
+			s.CustomerQueues[i].Mutex.Lock()
+			for _, customer := range s.CustomerQueues[i].Queue {
 				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customer)
 			}
 			s.CustomerQueues = append(s.CustomerQueues[:i], s.CustomerQueues[i+1:]...)
 		}
 	} else if len(queueLengths) < openCheckoutNum {
 		for i := len(queueLengths); i < openCheckoutNum; i++ {
-			s.CustomerQueues = append(s.CustomerQueues, []customer.CustomerAgent{})
+			s.CustomerQueues = append(s.CustomerQueues, constants.CustomerQueue{})
 		}
 	}
 
+<<<<<<< HEAD
 	/*for index, customers := range s.CustomersReadyToQueue {
 		customer.IsJoingQueue(&customers)
 		s.CustomerQueues[customer.SelectQueue(queueLengths)] = append(s.CustomerQueues[customer.SelectQueue(queueLengths)], customer)
+=======
+	/*for index, customer := range s.CustomersReadyToQueue {
+		queueIndex = customer.SelectQueue(queueLengths)
+		s.CustomerQueues[queueIndex].Mutex.Lock()
+		s.CustomerQueues[queueIndex].Queue = append(s.CustomerQueues[queueIndex].Queue, customer)
+		s.CustomerQueues[queueIndex].Mutex.Unlock()
+>>>>>>> c06bc615300606ae0abd182047dbbfc34d5becb2
 		s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
 	}*/
 }
 
 func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int) {
-	//...
+	/*for index, checkout := range s.Checkouts {
+		if checkout.ProcessingCustomer == false {
+			checkout.CurrentCustomerProgress = 0
+			s.CustomerQueues[index].Mutex.Lock()
+			if len(s.CustomerQueues[index].Queue) > 0 {
+				checkout.CurrentCustomer = s.CustomerQueues[index].Queue[0]
+				s.CustomerQueues[index].Queue = s.CustomerQueues[index].Queue[1:]
+			}
+			s.CustomerQueues[index].Mutex.Unlock()
+			checkout.ProcessingCustomer = true
+			go checkout.ProcessCustomer(s.ItemTimeBounds) // Processes items, calculates processing time, waits that amount of time then sets .ProcessingCustomer false
+		}
+	}*/
 }
 
 func (s *StoreAgent) propagateStore(currentShift int) {
@@ -206,16 +245,14 @@ func (s *StoreAgent) propagateStore(currentShift int) {
 		}
 		s.ManagerSecondShift.PropagateTime()*/
 	}
-
-	/*for _, checkout := range s.Checkouts {
-		checkout.PropagateTime()
-	}*/
 }
 
 func (s *StoreAgent) getQueueLengths() []int {
 	queueLengths := []int{}
 	for _, queue := range s.CustomerQueues {
-		queueLengths = append(queueLengths, len(queue))
+		queue.Mutex.Lock()
+		queueLengths = append(queueLengths, len(queue.Queue))
+		queue.Mutex.Unlock()
 	}
 	return queueLengths
 }
