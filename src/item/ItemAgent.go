@@ -17,11 +17,23 @@ func NewItem() *ItemAgent {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	ia := ItemAgent{}
 
-	ia.EighteenPlus = (r.Intn(2) == 1)
+	ia.EighteenPlus = setAgeLimit()
 	ia.Price = math.Round((r.Float64()*10)*100) / 100
 	ia.Handling = math.Round((r.Float64()*0.25)*100) / 100
 
 	return &ia
+}
+
+func setAgeLimit() bool {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	eighteenPlus := false
+
+	if (math.Round((r.Float64()*(1))*100) / 100) > 0.8 {
+		eighteenPlus = true
+	}
+
+	return eighteenPlus
 }
 
 //for testing

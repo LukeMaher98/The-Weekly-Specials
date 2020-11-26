@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"src/constants"
+	"src/customer"
 	"src/store"
 	"strings"
 )
@@ -55,6 +56,10 @@ func CreateScenarioAgent() ScenarioAgent {
 // CreateInitialisedScenarioAgent : creates populated Scenario for CLI
 func CreateInitialisedScenarioAgent() ScenarioAgent {
 	newScenario := CreateScenarioAgent()
+
+	//Uncomment to check items
+	//item.PrintItems()
+	print(customer.GetValue())
 
 	fmt.Println("Scenario Variables")
 	fmt.Println("---------------------")
@@ -319,6 +324,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 		newScenario.floorStaffAttributeBounds,
 		newScenario.cashierAttributeBounds,
 		newScenario.floorManagerAttributeBounds,
+		newScenario.itemLimitBounds,
 	)
 
 	return newScenario

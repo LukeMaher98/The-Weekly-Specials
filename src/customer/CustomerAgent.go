@@ -3,80 +3,142 @@ package customer
 import (
 	"math"
 	"math/rand"
+	"src/constants"
+	"src/floorStaff"
 	"src/item"
 	"time"
 )
 
 type CustomerAgent struct {
-	Items               []item.ItemAgent
-	ImpairmentFactor    float64
-	ReplaceItem         float64
-	CouponItem          float64
-	WithChildren        bool
-	LoyaltyCard         bool
-	BaseAmicability     float64
-	CustomerAmicability float64
-	PreferredPayment    float64
-	//avaliablePayment        []int
-	BaggintTimeSelfCheckout float64
-	EmergencyLeave          float64
-	SwitchLine              float64
-	Competence              float64
-	TrolleyLimit            int
-	FinishedShop            bool
+	Items                []item.ItemAgent
+	ImpairmentFactor     float64
+	CouponItem           float64
+	WithChildren         bool
+	LoyaltyCard          bool
+	BaseAmicability      float64
+	PreferredPayment     float64 //checkout or cashier don't have payment options rn?
+	EmergencyLeaveChance float64
+	EmergencyLeave       bool
+	Competence           float64
+	TrolleyLimit         int
+	CurrentTrolleyCount  int
+	FinishedShop         bool
+	InQueue              bool
+	FloorStaffNearby     floorStaff.FloorStaff
 }
 
-var r = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-func NewCustomer() CustomerAgent {
+func NewCustomer(itemBounds *constants.StoreAttributeBoundsInt) *CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	//float values
+	//static values
 	ca.ImpairmentFactor = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
-	ca.ReplaceItem = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
 	ca.BaseAmicability = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
-	ca.CustomerAmicability = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
 	ca.PreferredPayment = math.Round((r.Float64()*2)*100) / 100
-	ca.EmergencyLeave = math.Round((r.Float64()*1)*100) / 100
-	ca.SwitchLine = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
 	ca.Competence = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
-
-	//int values
-	ca.TrolleyLimit = r.Intn(100) + 1
-
-	//bool values
 	ca.WithChildren = (r.Intn(2) == 1)
 	ca.LoyaltyCard = (r.Intn(2) == 1)
 
-	//generate items
-	ca.Items = GenerateTrolley()
+	ca.TrolleyLimit = r.Intn(itemBounds.UpperBound-itemBounds.LowerBound) + itemBounds.LowerBound
 
-	//discuss this
+	//dynamic values
+	ca.EmergencyLeaveChance = 0.0
+	ca.CurrentTrolleyCount = 0
+	ca.EmergencyLeave = false
 	ca.FinishedShop = false
+	ca.InQueue = false
 
-	return ca
+	//generate items
+	ca.Items = []item.ItemAgent{}
+
+	return &ca
 }
 
-func GenerateTrolley() []item.ItemAgent {
-	//This obviously needs to be changed
-	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
-	var trolley []item.ItemAgent
-	var trolleyLimit = r.Intn(100) + 1
+func GetValue() string {
+	return "Hello"
+}
 
-	for i := 0; i < trolleyLimit; i++ {
-		trolley = append(trolley, *item.NewItem())
+func PropagateTime(ca *CustomerAgent) {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	//Add item to trolley
+	if ca.CurrentTrolleyCount <= ca.TrolleyLimit {
+		addItemToTrolley(ca)
+	} else {
+		ca.FinishedShop = true
 	}
 
-	return trolley
+	//Emergency Leave the store
+	ca.EmergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
+	if ca.EmergencyLeaveChance > 0.95 {
+		ca.EmergencyLeave = true
+	}
+
+	//Replace item while in Queue
+	if ca.InQueue {
+		replaceItem := (math.Round((r.Float64()*1)*100) / 100)
+		if replaceItem > 0.95 {
+			ca.InQueue = false
+		}
+	}
+
 }
 
-func (ca *CustomerAgent) PropagateTime() {
-	//each time iteration add an item to customers trolley or check if they are done shopping?
+func SelectQueue(QueueLengths []int) int {
+	selectedQueue := 0
+	currentQueueLength := QueueLengths[0]
 
+	for i, s := range QueueLengths {
+		if s <= currentQueueLength {
+			selectedQueue = i
+		}
+	}
+
+	return selectedQueue
 }
 
-/*func () ShoppingFinished {
+func IsFinishedShopping(ca *CustomerAgent) bool {
+	return ca.FinishedShop
+}
 
-}*/
+func IsJoingQueue(ca *CustomerAgent) {
+	ca.InQueue = true
+}
+
+func IsLeavingQueue(ca *CustomerAgent) bool {
+	return ca.InQueue
+}
+
+func GetCustomerItems(ca *CustomerAgent) []item.ItemAgent {
+	return ca.Items
+}
+
+func addItemToTrolley(ca *CustomerAgent) {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	var itemSkipped = 0.0
+	var isImpaired = ((ca.ImpairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
+	var helpedMultiplier = 0.0
+
+	isHelped := ca.FloorStaffNearby.Occupied
+
+	if ca.WithChildren && isImpaired {
+		itemSkipped = math.Round((r.Float64()*1)*100) / 100
+	} else if ca.WithChildren || isImpaired {
+		itemSkipped = math.Round((r.Float64()*0.8)*100) / 100
+	} else {
+		itemSkipped = math.Round((r.Float64()*0.4)*100) / 100
+	}
+
+	if isHelped {
+		if ca.BaseAmicability > 0.55 && ca.FloorStaffNearby.BaseHelpfulness > 0.55 {
+			helpedMultiplier = ca.Competence * ca.FloorStaffNearby.Competence
+		}
+	}
+
+	itemSkipped = itemSkipped - helpedMultiplier
+
+	if itemSkipped < 0.75 {
+		ca.Items = append(ca.Items, *item.NewItem())
+	}
+}
