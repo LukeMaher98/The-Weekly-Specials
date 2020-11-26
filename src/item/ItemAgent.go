@@ -13,13 +13,13 @@ type ItemAgent struct {
 	Handling     float64
 }
 
-func NewItem() *ItemAgent {
+func NewItem(UpperBound float64, LowerBound float64) *ItemAgent {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	ia := ItemAgent{}
 
 	ia.EighteenPlus = setAgeLimit()
 	ia.Price = math.Round((r.Float64()*10)*100) / 100
-	ia.Handling = math.Round((r.Float64()*0.25)*100) / 100
+	ia.Handling = math.Round(((r.Float64()*(UpperBound-LowerBound))+LowerBound)*100) / 100
 
 	return &ia
 }
@@ -39,6 +39,6 @@ func setAgeLimit() bool {
 //for testing
 func PrintItems() {
 	for i := 0; i < 10; i++ {
-		fmt.Println(*NewItem())
+		fmt.Println(*NewItem(55.0, 65.0))
 	}
 }

@@ -148,7 +148,7 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 	rand.Seed(time.Now().UnixNano())
 	if rand.Float64()*1.0 < rateOfArrival {
-		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound))
+		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound, s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound))
 	}
 }
 

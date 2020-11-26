@@ -23,10 +23,12 @@ type CustomerAgent struct {
 	CurrentTrolleyCount  int
 	FinishedShop         bool
 	InQueue              bool
+	ItemHandlingUpper    float64
+	ItemHandlingLower    float64
 	FloorStaffNearby     floorStaff.FloorStaff
 }
 
-func NewCustomer(UpperBound int, LowerBound int) *CustomerAgent {
+func NewCustomer(UpperBound int, LowerBound int, ItemHandlingUp float64, ItemHandlingLow float64) *CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -38,6 +40,9 @@ func NewCustomer(UpperBound int, LowerBound int) *CustomerAgent {
 	ca.Competence = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
 	ca.WithChildren = (r.Intn(2) == 1)
 	ca.LoyaltyCard = (r.Intn(2) == 1)
+
+	ca.ItemHandlingLower = ItemHandlingLow
+	ca.ItemHandlingUpper = ItemHandlingUp
 
 	ca.TrolleyLimit = r.Intn(UpperBound-LowerBound) + LowerBound
 
@@ -134,6 +139,6 @@ func (ca *CustomerAgent) addItemToTrolley() {
 	itemSkipped = itemSkipped - helpedMultiplier
 
 	if itemSkipped < 0.75 {
-		ca.Items = append(ca.Items, *item.NewItem())
+		ca.Items = append(ca.Items, *item.NewItem(ca.ItemHandlingUpper, ca.ItemHandlingLower))
 	}
 }
