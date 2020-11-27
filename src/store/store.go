@@ -147,7 +147,7 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 	rand.Seed(time.Now().UnixNano())
 	if rand.Float64()*1.0 < rateOfArrival {
-		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound, s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound))
+		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound))
 	}
 }
 
@@ -212,7 +212,7 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int) {
 
 func (s *StoreAgent) propagateStore(currentShift int) {
 	/*	for _, customer := range s.CustomersOnFloor {
-		customer.PropagateTime()
+		customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}*/
 
 	if currentShift == 0 {
