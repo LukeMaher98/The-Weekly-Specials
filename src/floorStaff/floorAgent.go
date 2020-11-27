@@ -63,3 +63,12 @@ func (staff *FloorStaff) PrintStaff() {
 	var os = staff.occupied
 	fmt.Printf("Cleaning Time:%.2f, Diligence Factor:%.2f, Base Helpfulness:%.2f, Actual Helpfulness:%.2f, Occupied Status:%t\n", ct, df, bh, ah, os)
 }
+
+// Code by Carl below
+type observer interface {
+	update(float64)
+}
+
+func (staff *FloorStaff) update(managerComp float64) {
+	//do something with manager competence
+}
