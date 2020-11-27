@@ -147,14 +147,16 @@ func getRateOfArrival(baseRate float64, currentDay int, currentTime float64, ext
 func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 	rand.Seed(time.Now().UnixNano())
 	if rand.Float64()*1.0 < rateOfArrival {
-		//s.CustomersOnFloor = append(s.CustomersOnFloor, customer.NewCustomer(s.ItemLimitBounds))
+		s.CustomersOnFloor = append(s.CustomersOnFloor, *customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound))
 	}
 }
 
+//customers need to be able to leave queues after they join .IsLeavingQueue()
+//in case they need to replace an item. chance during time propagation
 func (s *StoreAgent) propagateCustomerQueues(currentShift int) {
-	/*for index, customer := range s.CustomersOnFloor {
+	/*	for index, customer := range s.CustomersOnFloor {
 		if customer.IsFinishedShopping() {
-			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customer)
+			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customers)
 			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:])
 		}
 	}*/
@@ -184,7 +186,7 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int) {
 	}
 
 	/*for index, customer := range s.CustomersReadyToQueue {
-		queueIndex = customer.SelectQueue(queueLengths)
+		queueIndex := customer.SelectQueue(queueLengths)
 		s.CustomerQueues[queueIndex].Mutex.Lock()
 		s.CustomerQueues[queueIndex].Queue = append(s.CustomerQueues[queueIndex].Queue, customer)
 		s.CustomerQueues[queueIndex].Mutex.Unlock()
@@ -209,8 +211,8 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int) {
 }
 
 func (s *StoreAgent) propagateStore(currentShift int) {
-	/*for _, customer := range s.CustomersOnFloor {
-		customer.PropagateTime()
+	/*	for _, customer := range s.CustomersOnFloor {
+		customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}*/
 
 	if currentShift == 0 {

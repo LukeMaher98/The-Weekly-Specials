@@ -56,6 +56,9 @@ func CreateScenarioAgent() ScenarioAgent {
 func CreateInitialisedScenarioAgent() ScenarioAgent {
 	newScenario := CreateScenarioAgent()
 
+	//Uncomment to check items
+	//item.PrintItems()
+
 	fmt.Println("Scenario Variables")
 	fmt.Println("---------------------")
 
