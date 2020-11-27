@@ -61,7 +61,6 @@ func CreateInitialisedStoreAgent(
 	floorStaffAttributeBounds constants.StaffAttributeBounds,
 	cashierAttributeBounds constants.StaffAttributeBounds,
 	floorManagerAttributeBounds constants.StaffAttributeBounds,
-	itemLimitBounds constants.StoreAttributeBoundsInt,
 ) StoreAgent {
 	newStore := CreateStoreAgent()
 

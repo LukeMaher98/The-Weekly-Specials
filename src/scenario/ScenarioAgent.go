@@ -324,7 +324,6 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 		newScenario.floorStaffAttributeBounds,
 		newScenario.cashierAttributeBounds,
 		newScenario.floorManagerAttributeBounds,
-		newScenario.itemLimitBounds,
 	)
 
 	return newScenario
