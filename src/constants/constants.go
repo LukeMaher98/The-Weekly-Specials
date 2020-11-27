@@ -2,7 +2,6 @@ package constants
 
 import (
 	"src/customer"
-	"sync"
 )
 
 type StaffAttributeBounds struct {
@@ -27,7 +26,16 @@ type StoreShifts struct {
 	SecondShiftCount int
 }
 
+/*
 type CustomerQueue struct {
 	Mutex sync.Mutex
 	Queue []customer.CustomerAgent
+}
+*/
+
+type CustomerLost struct {
+	Customer customer.CustomerAgent
+	Day      int
+	Time     float64
+	Reason   string
 }
