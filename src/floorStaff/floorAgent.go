@@ -11,9 +11,10 @@ import (
 type FloorStaff struct {
 	cleaningTime      float64
 	diligenceFactor   float64
-	baseHelpfulness   float64
+	BaseHelpfulness   float64
 	actualHelpfulness float64
-	occupied          bool
+	Occupied          bool
+	Competence        float64
 }
 
 var x = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -27,13 +28,13 @@ func NewFloorStaff() *FloorStaff {
 	// Randomly initialised variables
 	staff.cleaningTime = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
 	staff.diligenceFactor = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
-	staff.baseHelpfulness = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
+	staff.BaseHelpfulness = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
 
 	// Dynamically defined variables
-	staff.actualHelpfulness = calcActualHelpfulness(staff.diligenceFactor, staff.baseHelpfulness)
+	staff.actualHelpfulness = calcActualHelpfulness(staff.diligenceFactor, staff.BaseHelpfulness)
 
 	// Initialised False
-	staff.occupied = false
+	staff.Occupied = false
 
 	// Return staff object
 	return &staff
@@ -41,12 +42,12 @@ func NewFloorStaff() *FloorStaff {
 
 // Getter for staff occupied status
 func (staff *FloorStaff) GetOccupied() bool {
-	return staff.occupied
+	return staff.Occupied
 }
 
 // Setter for staff occupied status
 func (staff *FloorStaff) SetOccupied(val bool) {
-	staff.occupied = val
+	staff.Occupied = val
 }
 
 // Dynamically calculate the actual helpfulness of the floor agent
@@ -58,9 +59,9 @@ func calcActualHelpfulness(diligenceFactor, baseHelpfulness float64) float64 {
 func (staff *FloorStaff) PrintStaff() {
 	var ct = staff.cleaningTime
 	var df = staff.diligenceFactor
-	var bh = staff.baseHelpfulness
+	var bh = staff.BaseHelpfulness
 	var ah = staff.actualHelpfulness
-	var os = staff.occupied
+	var os = staff.Occupied
 	fmt.Printf("Cleaning Time:%.2f, Diligence Factor:%.2f, Base Helpfulness:%.2f, Actual Helpfulness:%.2f, Occupied Status:%t\n", ct, df, bh, ah, os)
 }
 
