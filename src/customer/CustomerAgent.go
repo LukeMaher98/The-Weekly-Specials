@@ -1,7 +1,6 @@
 package customer
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"src/floorStaff"
@@ -60,17 +59,14 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 
 	//Add item to trolley
 	if ca.CurrentTrolleyCount <= ca.TrolleyLimit {
-		fmt.Println("Pre add Item: ", ca.Items)
 		ca.addItemToTrolley(ItemHandlingUpper, ItemHandlingLower)
-		fmt.Println("Post add Item: ",ca.Items)
 	} else {
 		ca.FinishedShop = true
-		fmt.Println("finished")
 	}
 
 	//Emergency Leave the store
 	ca.EmergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
-	if ca.EmergencyLeaveChance > 0.95 {
+	if ca.EmergencyLeaveChance > 2 {
 		ca.EmergencyLeave = true
 	}
 
@@ -147,10 +143,6 @@ func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlin
 	itemSkipped = itemSkipped - helpedMultiplier
 
 	if itemSkipped < 0.75 {
-		fmt.Println("item added")
-		fmt.Println("Trolley Limit:", ca.TrolleyLimit)
-
-		ca.Items = append(ca.Items, *item.NewItem(ItemHandlingUpper, ItemHandlingLower))
-		fmt.Println("Trolley Count:", len(ca.Items))
+		ca.Items = append(ca.Items, item.NewItem(ItemHandlingUpper, ItemHandlingLower))
 	}
 }

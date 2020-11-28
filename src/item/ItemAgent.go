@@ -1,7 +1,6 @@
 package item
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -13,7 +12,7 @@ type ItemAgent struct {
 	Handling     float64
 }
 
-func NewItem(UpperBound float64, LowerBound float64) *ItemAgent {
+func NewItem(UpperBound float64, LowerBound float64) ItemAgent {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	ia := ItemAgent{}
 
@@ -21,7 +20,7 @@ func NewItem(UpperBound float64, LowerBound float64) *ItemAgent {
 	ia.Price = math.Round((r.Float64()*10)*100) / 100
 	ia.Handling = math.Round(((r.Float64()*(UpperBound-LowerBound))+LowerBound)*100) / 100
 
-	return &ia
+	return ia
 }
 
 func setAgeLimit() bool {
@@ -34,11 +33,4 @@ func setAgeLimit() bool {
 	}
 
 	return eighteenPlus
-}
-
-//for testing
-func PrintItems() {
-	for i := 0; i < 10; i++ {
-		fmt.Println(*NewItem(55.0, 65.0))
-	}
 }

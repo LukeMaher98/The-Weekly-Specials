@@ -1,7 +1,6 @@
 package store
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"src/cashier"
@@ -111,18 +110,7 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
-	if (math.Mod(currentTime, 60) == 0) {
-		for i, customer := range s.CustomersOnFloor {
-			fmt.Println("Customer:", i, customer)
-		}
-		for i, customer := range s.CustomersReadyToQueue {
-			fmt.Println("Customer:", i, customer)
-		}
-	}
-	if (len(s.CustomersOnFloor) < 1) {
-		s.CustomersOnFloor = append(s.CustomersOnFloor, customer.NewCustomer(s.ItemLimitBounds.UpperBound, s.ItemLimitBounds.LowerBound))
-	}
-	// s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
+	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
 	s.propagateStore(currentShift, currentDay, currentTime)
 	s.propagateCustomerQueues(currentShift, currentDay, currentTime)
 	s.propagateConcurrentCheckouts(currentShift, currentDay, currentTime)
@@ -238,24 +226,23 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 }
 
 func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay int, currentTime float64) {
-	for index, checkout := range s.Checkouts {
-		if checkout.ProcessingCustomer == false {
-			checkout.CurrentCustomerProgress = 0
-			if len(s.CustomerQueues[index]) > 0 {
-				checkout.CurrentCustomer = s.CustomerQueues[index][0]
-				s.CustomerQueues[index] = s.CustomerQueues[index][1:]
+	for i := range s.Checkouts {
+		if s.Checkouts[i].ProcessingCustomer == false {
+			s.Checkouts[i].CurrentCustomerProgress = 0
+			if len(s.CustomerQueues[i]) > 0 {
+				s.Checkouts[i].CurrentCustomer = s.CustomerQueues[i][0]
+				s.CustomerQueues[i] = s.CustomerQueues[i][1:]
 			}
-			checkout.ProcessingCustomer = true
-			go checkout.ProcessCustomer(s.ItemTimeBounds)
+			s.Checkouts[i].ProcessingCustomer = true
+			go s.Checkouts[i].ProcessCustomer(s.ItemTimeBounds)
+			// print(s.Checkouts[i].TotalMoney)
 		}
 	}
 }
 
 func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTime float64) {
-	for _, customer := range s.CustomersOnFloor {
-		fmt.Println("Customer Items Before Prop:", customer.GetCustomerItems())
-		customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
-		fmt.Println("Customer Items After Prop:", customer.GetCustomerItems())
+	for i := range s.CustomersOnFloor {
+		s.CustomersOnFloor[i].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}
 
 	if currentShift == 0 {
@@ -270,13 +257,13 @@ func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTim
 		s.ManagerSecondShift.PropagateTime()
 	}
 
-	for _, customer := range s.CustomersReadyToQueue {
-		customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
+	for i := range s.CustomersReadyToQueue {
+		s.CustomersReadyToQueue[i].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}
 
-	for _, queue := range s.CustomerQueues {
-		for _, customer := range queue {
-			customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
+	for i, queue := range s.CustomerQueues {
+		for j := range queue {
+			s.CustomerQueues[i][j].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 		}
 	}
 }
