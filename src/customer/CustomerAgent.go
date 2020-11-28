@@ -26,7 +26,7 @@ type CustomerAgent struct {
 	FloorStaffNearby     floorStaff.FloorStaff
 }
 
-func NewCustomer(UpperBound int, LowerBound int) *CustomerAgent {
+func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -51,10 +51,10 @@ func NewCustomer(UpperBound int, LowerBound int) *CustomerAgent {
 	//generate items
 	ca.Items = []item.ItemAgent{}
 
-	return &ca
+	return ca
 }
 
-func (ca CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLower float64) {
+func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLower float64) {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	//Add item to trolley
@@ -93,19 +93,23 @@ func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	return selectedQueue
 }
 
-func (ca CustomerAgent) IsFinishedShopping() bool {
+func (ca *CustomerAgent) IsFinishedShopping() bool {
 	return ca.FinishedShop
 }
 
-func (ca CustomerAgent) IsJoingQueue() {
+func (ca *CustomerAgent) IsJoingQueue() {
 	ca.InQueue = true
 }
 
-func (ca CustomerAgent) IsLeavingQueue() bool {
+func (ca *CustomerAgent) IsLeavingQueue() bool {
 	return ca.InQueue
 }
 
-func (ca CustomerAgent) GetCustomerItems() []item.ItemAgent {
+func (ca *CustomerAgent) EmergencyDeparture() bool {
+	return ca.EmergencyLeave
+}
+
+func (ca *CustomerAgent) GetCustomerItems() []item.ItemAgent {
 	return ca.Items
 }
 
