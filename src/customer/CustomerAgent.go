@@ -1,6 +1,7 @@
 package customer
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"src/floorStaff"
@@ -23,12 +24,10 @@ type CustomerAgent struct {
 	CurrentTrolleyCount  int
 	FinishedShop         bool
 	InQueue              bool
-	ItemHandlingUpper    float64
-	ItemHandlingLower    float64
 	FloorStaffNearby     floorStaff.FloorStaff
 }
 
-func NewCustomer(UpperBound int, LowerBound int, ItemHandlingUp float64, ItemHandlingLow float64) CustomerAgent {
+func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -41,10 +40,7 @@ func NewCustomer(UpperBound int, LowerBound int, ItemHandlingUp float64, ItemHan
 	ca.WithChildren = (r.Intn(2) == 1)
 	ca.LoyaltyCard = (r.Intn(2) == 1)
 
-	ca.ItemHandlingLower = ItemHandlingLow
-	ca.ItemHandlingUpper = ItemHandlingUp
-
-	ca.TrolleyLimit = r.Intn(UpperBound-LowerBound) + LowerBound
+	ca.TrolleyLimit = r.Intn((UpperBound+1)-LowerBound) + LowerBound
 
 	//dynamic values
 	ca.EmergencyLeaveChance = 0.0
@@ -59,18 +55,17 @@ func NewCustomer(UpperBound int, LowerBound int, ItemHandlingUp float64, ItemHan
 	return ca
 }
 
-func GetValue() string {
-	return "Hello"
-}
-
-func (ca *CustomerAgent) PropagateTime() {
+func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLower float64) {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	//Add item to trolley
 	if ca.CurrentTrolleyCount <= ca.TrolleyLimit {
-		ca.addItemToTrolley()
+		fmt.Println("Pre add Item: ", ca.Items)
+		ca.addItemToTrolley(ItemHandlingUpper, ItemHandlingLower)
+		fmt.Println("Post add Item: ",ca.Items)
 	} else {
 		ca.FinishedShop = true
+		fmt.Println("finished")
 	}
 
 	//Emergency Leave the store
@@ -114,17 +109,22 @@ func (ca *CustomerAgent) IsLeavingQueue() bool {
 	return ca.InQueue
 }
 
+func (ca *CustomerAgent) EmergencyDeparture() bool {
+	return ca.EmergencyLeave
+}
+
 func (ca *CustomerAgent) GetCustomerItems() []item.ItemAgent {
 	return ca.Items
 }
 
-func (ca *CustomerAgent) addItemToTrolley() {
+func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	var itemSkipped = 0.0
 	var isImpaired = ((ca.ImpairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
 	var helpedMultiplier = 0.0
 
-	isHelped := ca.FloorStaffNearby.Occupied
+	// isHelped := ca.FloorStaffNearby.Occupied
+	isHelped := true
 
 	if ca.WithChildren && isImpaired {
 		itemSkipped = math.Round((r.Float64()*1)*100) / 100
@@ -134,15 +134,23 @@ func (ca *CustomerAgent) addItemToTrolley() {
 		itemSkipped = math.Round((r.Float64()*0.4)*100) / 100
 	}
 
+	// if isHelped {
+	// 	if ca.BaseAmicability > 0.55 && ca.FloorStaffNearby.BaseHelpfulness > 0.55 {
+	// 		helpedMultiplier = ca.Competence * ca.FloorStaffNearby.Competence
+	// 	}
+	// }
+
 	if isHelped {
-		if ca.BaseAmicability > 0.55 && ca.FloorStaffNearby.Amicability > 0.55 {
-			helpedMultiplier = ca.Competence * ca.FloorStaffNearby.Competance
-		}
+		helpedMultiplier = ca.Competence * 0.5
 	}
 
 	itemSkipped = itemSkipped - helpedMultiplier
 
 	if itemSkipped < 0.75 {
-		ca.Items = append(ca.Items, *item.NewItem(ca.ItemHandlingUpper, ca.ItemHandlingLower))
+		fmt.Println("item added")
+		fmt.Println("Trolley Limit:", ca.TrolleyLimit)
+
+		ca.Items = append(ca.Items, *item.NewItem(ItemHandlingUpper, ItemHandlingLower))
+		fmt.Println("Trolley Count:", len(ca.Items))
 	}
 }

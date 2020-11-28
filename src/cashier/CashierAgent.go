@@ -11,7 +11,6 @@ type CashierAgent struct {
 	Competence   float64
 	CashHandling float64
 	CardHandling float64
-	ItemHandling float64
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -24,7 +23,6 @@ func CreateInitialisedCashierAgent(amicLower, amicUpper, compLower, compUpper fl
 	cashier.Competence = math.Round(((r.Float64()*(compUpper-compLower))+compLower)*100) / 100
 	cashier.CashHandling = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
 	cashier.CardHandling = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
-	cashier.ItemHandling = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
 
 	return cashier
 }

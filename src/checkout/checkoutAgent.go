@@ -4,6 +4,7 @@ import (
 	"math"
 	"math/rand"
 	"src/cashier"
+	"src/constants"
 	"src/customer"
 	"src/manager"
 	"time"
@@ -13,8 +14,10 @@ type CheckoutAgent struct {
 	SelfCheckout bool
 	AdultCheckout bool 
 	ProcessingCustomer bool
+	// These two do nothing right now 
 	CurrentCustomerProgress float64
 	AssistanceWaitTime float64
+
 	TotalMoney float64
 	FirstShiftCashier cashier.CashierAgent
 	SecondShiftCashier cashier.CashierAgent
@@ -67,7 +70,7 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool{
 	return Manned
 }
 
-func (co* CheckoutAgent) ProcessCustomer() {
+func (co* CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
 	
 	for _, item := range co.CurrentCustomer.Items {
 		co.CurrentCustomerProgress += item.Handling

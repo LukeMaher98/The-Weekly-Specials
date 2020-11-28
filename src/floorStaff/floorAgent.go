@@ -10,7 +10,8 @@ import (
 type FloorStaff struct {
  	Amicability float64
 	Competance float64
-	Occupied bool
+	OccupyingCustomer bool
+	ManagerOccupied bool
 }
 
 // Floor Staff agent constructor
@@ -26,7 +27,8 @@ func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) Fl
 	staff.Competance = math.Round(((r.Float64()*(CompUB-CompLB))+CompLB)*100) / 100
 
 	// Initialised False
-	staff.Occupied = false
+	staff.OccupyingCustomer = false
+	staff.ManagerOccupied = false 
 
 	// Return staff object
 	return staff
@@ -39,21 +41,7 @@ func (fs *FloorStaff) PropagateTime() {
 
 	// 50% chance to change occupied status
 	if r.Float64() < fs.Amicability {
-		fs.Occupied = !fs.Occupied
+		fs.OccupyingCustomer = !fs.OccupyingCustomer
 	}
 
-
 }
-
-func (fs *FloorStaff) something() {
-	
-}
-
-// Code by Carl below
-// type observer interface {
-// 	update(float64)
-// }
-
-// func (staff *FloorStaff) update(managerComp float64) {
-// 	//do something with manager competence
-// }
