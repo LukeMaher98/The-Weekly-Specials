@@ -3,66 +3,96 @@ package manager
 import (
 	"math"
 	"math/rand"
+	"src/cashier"
+	"src/checkout"
+	"src/floorStaff"
 	"time"
 )
 
+// ManagerAgent : the manager struct
 type ManagerAgent struct {
-	amicability float64
-	competence  float64
-	onFloor     bool
-	WorkingCheckout bool
-	SupervisingCashier bool
-	SupervisingFloorStaff bool
-
-	//observerList []observer
+	amicability    float64
+	competence     float64
+	onFloor        bool
+	currentCashier *cashier.CashierAgent
+	floorStaff     []floorStaff.FloorStaff
+	cashiers       []cashier.CashierAgent
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-// NewManager : creates new manager on floor
-func CreateInitialisedFloorManagerAgent(amicLower, amicUpper, compLower, compUpper float64) ManagerAgent {
+// CreateInitialisedFloorManagerAgent : creates new manager on floor
+func CreateInitialisedFloorManagerAgent(amicLower, amicUpper, compLower, compUpper float64, staff []floorStaff.FloorStaff, co []checkout.CheckoutAgent, shift int) ManagerAgent {
 	manager := ManagerAgent{}
 
 	manager.amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
 	manager.competence = math.Round(((r.Float64()*(compUpper-compLower))-compLower)*100) / 100
 	manager.onFloor = true
+	manager.floorStaff = staff
+
+	manager.cashiers = getCashiers(co, shift)
 
 	return manager
 }
 
-// PropogateTime : propogates time for the manager
+// PropagateTime : propogates time for the manager
 func (mngr *ManagerAgent) PropagateTime() {
-	//check queue lengths, if queue.length > x && checkout empty man checkout
-
 	// 1/4 chance of moving
 	if r.Float64() < 0.25 {
 		if r.Float64() < 0.5 {
-			if mngr.onFloor == true {
-				mngr.onFloor = false
-			} else {
-				mngr.onFloor = true
-			}
+			mngr.WorkTheFloor()
 		} else {
-			//go to random checkout
+			mngr.SuperviseCashier()
 		}
 	}
 }
 
-func (mngr *ManagerAgent) WorkCheckout() {
-	//queues[] = getQueueLengths()
+// WorkTheFloor : moves manager to floor or keeps them there
+func (mngr *ManagerAgent) WorkTheFloor() {
+	if !mngr.onFloor {
+		mngr.onFloor = true
+		mngr.currentCashier.ManagerAbsent()
+		mngr.currentCashier = nil
+
+		for i := range mngr.floorStaff {
+			if mngr.floorStaff[i].Amicability*mngr.amicability > ((r.Float64()*(0.3))+0.2)*100 {
+				mngr.floorStaff[i].ManagerPresent(mngr.competence)
+			}
+		}
+	}
 }
 
-// func (mngr *ManagerAgent) register(o observer) {
-// 	mngr.observerList = append(mngr.observerList, o)
-// }
+// SuperviseCashier : manager supervises a checkout
+func (mngr *ManagerAgent) SuperviseCashier() {
+	if mngr.onFloor {
+		mngr.onFloor = false
+		for i := range mngr.floorStaff {
+			mngr.floorStaff[i].ManagerAbsent()
+		}
+	}
 
-// func (mngr *ManagerAgent) notifyAll() {
-// 	for _, observer := range mngr.observerList {
-// 		observer.update(mngr.competence)
-// 	}
-// }
+	randomIndex := r.Intn(len(mngr.cashiers))
+	pick := mngr.cashiers[randomIndex]
+	mngr.currentCashier = &pick
+	mngr.currentCashier.ManagerPresent(mngr.amicability)
+}
 
-// //clear whole slice at end of shift and repopulate from scratch
-// func (mngr *ManagerAgent) clearSlice() {
-// 	mngr.observerList = nil
-// }
+func getCashiers(co []checkout.CheckoutAgent, shift int) []cashier.CashierAgent {
+	var cash []cashier.CashierAgent
+
+	if shift == 1 {
+		for _, c := range co {
+			if c.IsManned(shift) {
+				cash = append(cash, c.FirstShiftCashier)
+			}
+		}
+	} else if shift == 2 {
+		for _, c := range co {
+			if c.IsManned(shift) {
+				cash = append(cash, c.SecondShiftCashier)
+			}
+		}
+	}
+
+	return cash
+}

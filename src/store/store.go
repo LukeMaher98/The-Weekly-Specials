@@ -97,10 +97,12 @@ func CreateInitialisedStoreAgent(
 	}
 
 	newStore.ManagerFirstShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+		newStore.FloorStaffFirstShift, newStore.Checkouts, 1)
 
 	newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+		newStore.FloorStaffSecondShift, newStore.Checkouts, 2)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if arrivalRates.UpperBound != arrivalRates.LowerBound {

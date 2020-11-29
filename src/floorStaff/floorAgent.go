@@ -8,10 +8,11 @@ import (
 
 // Floor Staff agent struct
 type FloorStaff struct {
- 	Amicability float64
-	Competance float64
+	managerBoost      float64
+	Amicability       float64
+	Competance        float64
 	OccupyingCustomer bool
-	ManagerOccupied bool
+	ManagerOccupied   bool
 }
 
 // Floor Staff agent constructor
@@ -19,8 +20,11 @@ func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) Fl
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Create staff agent 
-	staff := FloorStaff {}
+	// Create staff agent
+	staff := FloorStaff{}
+
+	//Initialised to 1
+	staff.managerBoost = 1
 
 	// Randomly initialised variables based on boundings
 	staff.Amicability = math.Round(((r.Float64()*(AmicUB-AmicLB))+AmicLB)*100) / 100
@@ -28,20 +32,28 @@ func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) Fl
 
 	// Initialised False
 	staff.OccupyingCustomer = false
-	staff.ManagerOccupied = false 
+	staff.ManagerOccupied = false
 
 	// Return staff object
 	return staff
 }
 
-// Placeholder stuff 
 func (fs *FloorStaff) PropagateTime() {
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// 50% chance to change occupied status
-	if r.Float64() < fs.Amicability {
+	if r.Float64() < (fs.Amicability * fs.managerBoost) {
 		fs.OccupyingCustomer = !fs.OccupyingCustomer
 	}
 
+}
+
+// ManagerPresent : applies a boost to the cashier
+func (fs *FloorStaff) ManagerPresent(boost float64) {
+	fs.managerBoost = boost + 1.00
+}
+
+// ManagerAbsent : reverts the boost to the cashier
+func (fs *FloorStaff) ManagerAbsent() {
+	fs.managerBoost = 1
 }
