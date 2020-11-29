@@ -37,9 +37,7 @@ func (cashier *CashierAgent) PropagateTime() {
 
 // TimeToProcess : returns the time to process x items
 func (cashier *CashierAgent) TimeToProcess() float64 {
-	var processed float64 = 1.2 - (cashier.competence * cashier.managerBoost)
-
-	return processed
+	return 1.2 - ((cashier.amicability * cashier.managerBoost) / 2.5)
 }
 
 // ManagerPresent : applies a boost to the cashier

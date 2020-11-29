@@ -22,7 +22,7 @@ type ManagerAgent struct {
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // CreateInitialisedFloorManagerAgent : creates new manager on floor
-func CreateInitialisedFloorManagerAgent(amicUpper, amicLower, compUpper, compLower float64, staff []floorStaff.FloorStaff, co []checkout.CheckoutAgent, shift int) ManagerAgent {
+func CreateInitialisedFloorManagerAgent(amicLower, amicUpper, compLower, compUpper float64, staff []floorStaff.FloorStaff, co []checkout.CheckoutAgent, shift int) ManagerAgent {
 	manager := ManagerAgent{}
 
 	manager.amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
