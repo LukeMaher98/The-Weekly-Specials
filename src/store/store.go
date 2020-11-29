@@ -77,7 +77,7 @@ func CreateInitialisedStoreAgent(
 	for i := 0; i < cashierShifts.FirstShiftCount; i++ {
 		newStore.CustomerQueues = append(newStore.CustomerQueues, []customer.CustomerAgent{})
 		newStore.Checkouts[i].FirstShiftCashier = cashier.CreateInitialisedCashierAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+			floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
 	}
 
 	for i := 0; i < cashierShifts.SecondShiftCount; i++ {
@@ -96,10 +96,12 @@ func CreateInitialisedStoreAgent(
 	}
 
 	newStore.ManagerFirstShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+		newStore.FloorStaffFirstShift, newStore.Checkouts, 1)
 
 	newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+		newStore.FloorStaffFirstShift, newStore.Checkouts, 2)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	arrivalRange := float64(arrivalRates.UpperBound - arrivalRates.LowerBound)
@@ -224,7 +226,7 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 			} else {
 				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Queues too long"})
 			}
-			if (index == len(s.CustomersReadyToQueue)) {
+			if index == len(s.CustomersReadyToQueue) {
 				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:], s.CustomersReadyToQueue[:index]...)
 			} else {
 				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
@@ -239,7 +241,7 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 			j = j - removedCustomers
 			if s.CustomerQueues[i][j].EmergencyDeparture() {
 				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: s.CustomerQueues[i][j], Day: currentDay, Time: currentTime, Reason: "Emergency"})
-				if (j == len(s.CustomerQueues[i])) {
+				if j == len(s.CustomerQueues[i]) {
 					s.CustomerQueues[i] = append(s.CustomerQueues[i][:], s.CustomerQueues[i][:j]...)
 				} else {
 					s.CustomerQueues[i] = append(s.CustomerQueues[i][:j], s.CustomerQueues[i][j+1:]...)
@@ -248,7 +250,7 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 				continue
 			} else if s.CustomerQueues[i][j].IsLeavingQueue() {
 				s.CustomersOnFloor = append(s.CustomersReadyToQueue, s.CustomerQueues[i][j])
-				if (j == len(s.CustomerQueues[i])) {
+				if j == len(s.CustomerQueues[i]) {
 					s.CustomerQueues[i] = append(s.CustomerQueues[i][:], s.CustomerQueues[i][:j]...)
 				} else {
 					s.CustomerQueues[i] = append(s.CustomerQueues[i][:j], s.CustomerQueues[i][j+1:]...)

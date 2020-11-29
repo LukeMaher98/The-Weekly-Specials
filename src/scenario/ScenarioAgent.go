@@ -297,7 +297,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			} else if newScenario.floorManagerAttributeBounds.CompetanceUpperBound < newScenario.floorManagerAttributeBounds.CompetanceLowerBound ||
 				newScenario.floorManagerAttributeBounds.CompetanceUpperBound > 1.0 {
 				fmCompetanceUpperBoundTemp := 0.0
-				fmt.Printf("Floor Manager Amicability Upper Bound [%v-1.0]> ", newScenario.floorManagerAttributeBounds.CompetanceLowerBound)
+				fmt.Printf("Floor Manager Competence Upper Bound [%v-1.0]> ", newScenario.floorManagerAttributeBounds.CompetanceLowerBound)
 				fmt.Scanln(&fmCompetanceUpperBoundTemp)
 				if fmCompetanceUpperBoundTemp >= newScenario.floorManagerAttributeBounds.CompetanceLowerBound && fmCompetanceUpperBoundTemp <= 1.0 {
 					newScenario.floorManagerAttributeBounds.CompetanceUpperBound = fmCompetanceUpperBoundTemp
@@ -339,12 +339,12 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 	if s.currentTime >= s.openingTime*60 && s.currentTime <= s.closingTime*60 {
 		if s.currentTime < (s.openingTime*60 + ((s.closingTime - s.openingTime) * 30)) {
 			s.store.PropagateTime(0, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
-			if (math.Mod(s.currentTime, 60) == 0){
+			if math.Mod(s.currentTime, 60) == 0 {
 				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 0")
 			}
 		} else {
 			s.store.PropagateTime(1, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
-			if (math.Mod(s.currentTime, 60) == 0){
+			if math.Mod(s.currentTime, 60) == 0 {
 				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
 			}
 		}

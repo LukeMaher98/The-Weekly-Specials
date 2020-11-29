@@ -42,7 +42,6 @@ func (fs *FloorStaff) PropagateTime() {
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// 50% chance to change occupied status
 	if r.Float64() < (fs.Amicability * fs.managerBoost) {
 		fs.OccupyingCustomer = !fs.OccupyingCustomer
 	}
