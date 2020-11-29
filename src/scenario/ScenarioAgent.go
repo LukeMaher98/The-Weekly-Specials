@@ -96,14 +96,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			}
 		} else if !(newScenario.weatherConditions >= -1.0 && newScenario.weatherConditions <= 1.0) {
 			weatherConditionsTemp := -2.0
-			fmt.Print("Negative or positive impact of weather conditions [-1.0-1.0]> ")
+			fmt.Print("Negative or positive impact of weather conditions [-1.0-+1.0]> ")
 			fmt.Scanln(&weatherConditionsTemp)
 			if weatherConditionsTemp >= -1.0 && weatherConditionsTemp <= 1.0 {
 				newScenario.weatherConditions = weatherConditionsTemp
 			}
 		} else if !(newScenario.socialConditions >= -1.0 && newScenario.socialConditions <= 1.0) {
 			socialConditionsTemp := -2.0
-			fmt.Print("Negative or positive impact of social conditions (e.g concert, match, local tragedy etc) [-1.0-1.0]> ")
+			fmt.Print("Negative or positive impact of social conditions (e.g concert, match, local tragedy etc) [-1.0-+1.0]> ")
 			fmt.Scanln(&socialConditionsTemp)
 			if socialConditionsTemp >= -1.0 && socialConditionsTemp <= 1.0 {
 				newScenario.socialConditions = socialConditionsTemp
@@ -229,7 +229,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			} else if newScenario.floorStaffAttributeBounds.CompetanceUpperBound < newScenario.floorStaffAttributeBounds.CompetanceLowerBound ||
 				newScenario.floorStaffAttributeBounds.CompetanceUpperBound > 1.0 {
 				fsCompetanceUpperBoundTemp := 0.0
-				fmt.Printf("Floor Staff Amicability Upper Bound [%v-1.0]> ", newScenario.floorStaffAttributeBounds.CompetanceLowerBound)
+				fmt.Printf("Floor Staff Competance Upper Bound [%v-1.0]> ", newScenario.floorStaffAttributeBounds.CompetanceLowerBound)
 				fmt.Scanln(&fsCompetanceUpperBoundTemp)
 				if fsCompetanceUpperBoundTemp >= newScenario.floorStaffAttributeBounds.CompetanceLowerBound && fsCompetanceUpperBoundTemp <= 1.0 {
 					newScenario.floorStaffAttributeBounds.CompetanceUpperBound = fsCompetanceUpperBoundTemp
