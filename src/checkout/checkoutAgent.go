@@ -6,7 +6,6 @@ import (
 	"src/cashier"
 	"src/constants"
 	"src/customer"
-	"src/manager"
 	"time"
 )
 
@@ -21,7 +20,6 @@ type CheckoutAgent struct {
 	TotalMoney         float64
 	FirstShiftCashier  cashier.CashierAgent
 	SecondShiftCashier cashier.CashierAgent
-	ManagerOnCashier   manager.ManagerAgent
 	CurrentCustomer    customer.CustomerAgent
 
 	CustomersProcessed int
@@ -43,7 +41,6 @@ func CreateInitialisedCheckoutAgent() CheckoutAgent {
 	co.TotalMoney = 0
 	co.FirstShiftCashier = cashier.CashierAgent{}
 	co.SecondShiftCashier = cashier.CashierAgent{}
-	co.ManagerOnCashier = manager.ManagerAgent{}
 
 	return co
 }
@@ -56,13 +53,13 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool {
 	Manned := false
 
 	if currentShift == 0 {
-		if ((cashier.CashierAgent{}) == co.FirstShiftCashier) && ((manager.ManagerAgent{}) == co.ManagerOnCashier) {
+		if ((cashier.CashierAgent{}) == co.FirstShiftCashier) {
 			Manned = false
 		} else {
 			Manned = true
 		}
 	} else {
-		if ((cashier.CashierAgent{}) == co.SecondShiftCashier) && ((manager.ManagerAgent{}) == co.ManagerOnCashier) {
+		if ((cashier.CashierAgent{}) == co.SecondShiftCashier) {
 			Manned = false
 		} else {
 			Manned = true

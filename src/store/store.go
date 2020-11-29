@@ -97,10 +97,12 @@ func CreateInitialisedStoreAgent(
 	}
 
 	newStore.ManagerFirstShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+        floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+        newStore.FloorStaffFirstShift, newStore.Checkouts, 1)
 
-	newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
+    newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+        floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+        newStore.FloorStaffFirstShift, newStore.Checkouts, 2)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	arrivalRange := float64(arrivalRates.UpperBound - arrivalRates.LowerBound)
@@ -340,7 +342,7 @@ func (s *StoreAgent) PrintResults() {
 	totalCustomersProcessed := 0
 	totalMonetaryIntake := 0.0
 	fmt.Println("Scenario Results:")
-	fmt.Println("------------------\n")
+	fmt.Println("------------------")
 	for index, checkout := range s.Checkouts {
 		fmt.Println("[Checkout ", index, "] Customers Processed: ", checkout.CustomersProcessed, " Monetary Intake: ", checkout.TotalMoney)
 		totalCustomersProcessed += checkout.CustomersProcessed
