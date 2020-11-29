@@ -110,6 +110,17 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
+	// for i := range s.CustomerQueues {
+	// 	if(len(s.CustomerQueues[i]) > 0){
+	// 		fmt.Println("Floor Customers:", len(s.CustomersOnFloor))
+	// 		fmt.Println("Lost Customers:", len(s.CustomersLost))
+	// 		fmt.Println("RTQ Customers:", len(s.CustomersReadyToQueue))
+	// 		for i := range s.CustomerQueues {
+	// 			fmt.Println("Queue:", i, len(s.CustomerQueues[i]))
+	// 		}
+	// 	}
+	// }
+
 	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
 	s.propagateStore(currentShift, currentDay, currentTime)
 	s.propagateCustomerQueues(currentShift, currentDay, currentTime)
@@ -161,14 +172,18 @@ func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 }
 
 func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, currentTime float64) {
-	for index, customer := range s.CustomersOnFloor {
-		if customer.EmergencyDeparture() {
-			s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Emergency"})
-			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:]...)
+	removedCount := 0
+	for i := range s.CustomersOnFloor {
+		i = i - removedCount
+		if s.CustomersOnFloor[i].EmergencyDeparture() {
+			s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: s.CustomersOnFloor[i], Day: currentDay, Time: currentTime, Reason: "Emergency"})
+			s.CustomersOnFloor = append(s.CustomersOnFloor[:i], s.CustomersOnFloor[i+1:]...)
+			removedCount++
 			continue
-		} else if customer.IsFinishedShopping() {
-			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customer)
-			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:]...)
+		} else if s.CustomersOnFloor[i].IsFinishedShopping() {
+			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, s.CustomersOnFloor[i])
+			s.CustomersOnFloor = append(s.CustomersOnFloor[:i], s.CustomersOnFloor[i+1:]...)
+			removedCount++
 		}
 	}
 
@@ -195,7 +210,9 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 		}
 	}
 
+	removedCustomers := 0
 	for index, customer := range s.CustomersReadyToQueue {
+		index = index - removedCustomers
 		if customer.EmergencyDeparture() {
 			s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Emergency"})
 			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
@@ -207,19 +224,36 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 			} else {
 				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Queues too long"})
 			}
-			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
+			if (index == len(s.CustomersReadyToQueue)) {
+				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:], s.CustomersReadyToQueue[:index]...)
+			} else {
+				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
+			}
+			removedCustomers++
 		}
 	}
 
-	for _, queue := range s.CustomerQueues {
-		for index, customer := range queue {
-			if customer.EmergencyDeparture() {
-				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Emergency"})
-				queue = append(queue[:index], queue[index+1:]...)
+	for i := range s.CustomerQueues {
+		removedCustomers = 0
+		for j := range s.CustomerQueues[i] {
+			j = j - removedCustomers
+			if s.CustomerQueues[i][j].EmergencyDeparture() {
+				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: s.CustomerQueues[i][j], Day: currentDay, Time: currentTime, Reason: "Emergency"})
+				if (j == len(s.CustomerQueues[i])) {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:], s.CustomerQueues[i][:j]...)
+				} else {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:j], s.CustomerQueues[i][j+1:]...)
+				}
+				removedCustomers++
 				continue
-			} else if customer.IsLeavingQueue() {
-				s.CustomersOnFloor = append(s.CustomersReadyToQueue, customer)
-				queue = append(queue[:index], queue[index+1:]...)
+			} else if s.CustomerQueues[i][j].IsLeavingQueue() {
+				s.CustomersOnFloor = append(s.CustomersReadyToQueue, s.CustomerQueues[i][j])
+				if (j == len(s.CustomerQueues[i])) {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:], s.CustomerQueues[i][:j]...)
+				} else {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:j], s.CustomerQueues[i][j+1:]...)
+				}
+				removedCustomers++
 			}
 		}
 	}
@@ -233,6 +267,7 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay i
 				s.Checkouts[i].CurrentCustomer = s.CustomerQueues[i][0]
 				s.CustomerQueues[i] = s.CustomerQueues[i][1:]
 			}
+			//fmt.Println(s.Checkouts[i].CurrentCustomer)
 			s.Checkouts[i].ProcessingCustomer = true
 			go s.Checkouts[i].ProcessCustomer(s.ItemTimeBounds)
 			// print(s.Checkouts[i].TotalMoney)

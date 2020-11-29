@@ -363,7 +363,9 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 func (s *ScenarioAgent) PrintResults() {
 	fmt.Println("Scenario Results:")
 	fmt.Println("------------------")
-	fmt.Println("Checkout 1:", s.store.Checkouts[1].TotalMoney)
+	for i := range s.store.Checkouts {
+		fmt.Println("Total Money in Checkout", i, ": €", s.store.Checkouts[i].TotalMoney)
+	}
 	//...
 }
 

@@ -71,10 +71,10 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool{
 }
 
 func (co* CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
-	
-	for _, item := range co.CurrentCustomer.Items {
-		co.CurrentCustomerProgress += item.Handling
-		co.TotalMoney += item.Price
+
+	for _, item := range co.CurrentCustomer.GetCustomerItems() {
+		co.CurrentCustomerProgress += item.GetItemHandling()
+		co.TotalMoney += item.GetPrice()
 	}
 
 	// 1 clock = 60 seconds, dividing by 10 for a [0.5-6] second time to scan per item depending on the handling
