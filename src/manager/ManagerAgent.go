@@ -54,8 +54,10 @@ func (mngr *ManagerAgent) WorkTheFloor() {
 		mngr.currentCashier.ManagerAbsent()
 		mngr.currentCashier = nil
 
-		for _, staff := range mngr.floorStaff {
-			staff.ManagerPresent(mngr.competence)
+		for i := range mngr.floorStaff {
+			if mngr.floorStaff[i].Amicability*mngr.amicability > ((r.Float64()*(0.3))+0.2)*100 {
+				mngr.floorStaff[i].ManagerPresent(mngr.competence)
+			}
 		}
 	}
 }
@@ -64,8 +66,8 @@ func (mngr *ManagerAgent) WorkTheFloor() {
 func (mngr *ManagerAgent) SuperviseCashier() {
 	if mngr.onFloor {
 		mngr.onFloor = false
-		for _, staff := range mngr.floorStaff {
-			staff.ManagerAbsent()
+		for i := range mngr.floorStaff {
+			mngr.floorStaff[i].ManagerAbsent()
 		}
 	}
 
