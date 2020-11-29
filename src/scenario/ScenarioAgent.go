@@ -29,7 +29,7 @@ type ScenarioAgent struct {
 	cashierAttributeBounds      constants.StaffAttributeBounds
 	floorManagerAttributeBounds constants.StaffAttributeBounds
 
-	store store.StoreAgent
+	Store store.StoreAgent
 
 	// Dynamically Defined variables
 	currentDay   int
@@ -43,8 +43,8 @@ func CreateScenarioAgent() ScenarioAgent {
 		constants.StoreAttributeBoundsInt{UpperBound: 0, LowerBound: 0},
 		constants.StoreAttributeBoundsFloat{UpperBound: 0.0, LowerBound: 0.0},
 		constants.StoreAttributeBoundsInt{UpperBound: -1, LowerBound: -1},
-		constants.StoreShifts{FirstShiftCount: -1, SecondShiftCount: -1},
-		constants.StoreShifts{FirstShiftCount: -1, SecondShiftCount: -1},
+		constants.StoreShifts{FirstShiftCount: 0, SecondShiftCount: 0},
+		constants.StoreShifts{FirstShiftCount: 0, SecondShiftCount: 0},
 		constants.StaffAttributeBounds{AmicabilityUpperBound: -1.0, AmicabilityLowerBound: -1.0, CompetanceUpperBound: -1.0, CompetanceLowerBound: -1.0},
 		constants.StaffAttributeBounds{AmicabilityUpperBound: -1.0, AmicabilityLowerBound: -1.0, CompetanceUpperBound: -1.0, CompetanceLowerBound: -1.0},
 		constants.StaffAttributeBounds{AmicabilityUpperBound: -1.0, AmicabilityLowerBound: -1.0, CompetanceUpperBound: -1.0, CompetanceLowerBound: -1.0},
@@ -172,32 +172,32 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			if arrivalUpperBoundTemp >= newScenario.arrivalBounds.LowerBound && arrivalUpperBoundTemp <= 60 {
 				newScenario.arrivalBounds.UpperBound = arrivalUpperBoundTemp
 			}
-		} else if !(newScenario.floorStaffShifts.FirstShiftCount >= 0) {
-			firstShiftFloorStaffTemp := -1
-			fmt.Print("Number of Floor Staff [First Shift] [0+]> ")
+		} else if !(newScenario.floorStaffShifts.FirstShiftCount > 0) {
+			firstShiftFloorStaffTemp := 0
+			fmt.Print("Number of Floor Staff [First Shift] [1+]> ")
 			fmt.Scanln(&firstShiftFloorStaffTemp)
-			if firstShiftFloorStaffTemp >= 0 {
+			if firstShiftFloorStaffTemp >= 1 {
 				newScenario.floorStaffShifts.FirstShiftCount = firstShiftFloorStaffTemp
 			}
-		} else if !(newScenario.floorStaffShifts.SecondShiftCount >= 0) {
-			secondShiftFloorStaffTemp := -1
-			fmt.Print("Number of Floor Staff [Second Shift] [0+]> ")
+		} else if !(newScenario.floorStaffShifts.SecondShiftCount > 0) {
+			secondShiftFloorStaffTemp := 0
+			fmt.Print("Number of Floor Staff [Second Shift] [1+]> ")
 			fmt.Scanln(&secondShiftFloorStaffTemp)
-			if secondShiftFloorStaffTemp >= 0 {
+			if secondShiftFloorStaffTemp >= 1 {
 				newScenario.floorStaffShifts.SecondShiftCount = secondShiftFloorStaffTemp
 			}
-		} else if !(newScenario.cashierShifts.FirstShiftCount >= 0) {
-			firstShiftCashiersTemp := -1
-			fmt.Print("Number of Cashiers [First Shift] [0+]> ")
+		} else if !(newScenario.cashierShifts.FirstShiftCount > 0 && newScenario.cashierShifts.FirstShiftCount <= newScenario.checkoutCount) {
+			firstShiftCashiersTemp := 0
+			fmt.Printf("Number of Cashiers [First Shift] [1-%v]> ", newScenario.checkoutCount)
 			fmt.Scanln(&firstShiftCashiersTemp)
-			if firstShiftCashiersTemp >= 0 {
+			if firstShiftCashiersTemp >= 1 && firstShiftCashiersTemp <= newScenario.checkoutCount {
 				newScenario.cashierShifts.FirstShiftCount = firstShiftCashiersTemp
 			}
-		} else if !(newScenario.cashierShifts.SecondShiftCount >= 0) {
-			secondShiftCashiersTemp := -1
-			fmt.Print("Number of Cashiers [Second Shift] [0+]> ")
+		} else if !(newScenario.cashierShifts.SecondShiftCount > 0 && newScenario.cashierShifts.SecondShiftCount <= newScenario.checkoutCount) {
+			secondShiftCashiersTemp := 0
+			fmt.Printf("Number of Cashiers [Second Shift] [1-%v]> ", newScenario.checkoutCount)
 			fmt.Scanln(&secondShiftCashiersTemp)
-			if secondShiftCashiersTemp >= 0 {
+			if secondShiftCashiersTemp >= 1 && secondShiftCashiersTemp <= newScenario.checkoutCount {
 				newScenario.cashierShifts.SecondShiftCount = secondShiftCashiersTemp
 			}
 		} else if employeeDefinitionCheck == false {
@@ -314,7 +314,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 		}
 	}
 
-	newScenario.store = store.CreateInitialisedStoreAgent(
+	newScenario.Store = store.CreateInitialisedStoreAgent(
 		newScenario.arrivalBounds,
 		newScenario.itemLimitBounds,
 		newScenario.itemTimeBounds,
@@ -338,14 +338,14 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 	s.currentTime = math.Mod((elapsedTime + s.startingTime*60), 1440.0)
 	if s.currentTime >= s.openingTime*60 && s.currentTime <= s.closingTime*60 {
 		if s.currentTime < (s.openingTime*60 + ((s.closingTime - s.openingTime) * 30)) {
-			s.store.PropagateTime(0, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
-			if (math.Mod(s.currentTime, 60) == 0){
-				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 0")
+			s.Store.PropagateTime(0, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
+			if math.Mod(s.currentTime, 60) == 0 {
+				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
 			}
 		} else {
-			s.store.PropagateTime(1, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
-			if (math.Mod(s.currentTime, 60) == 0){
-				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
+			s.Store.PropagateTime(1, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
+			if math.Mod(s.currentTime, 60) == 0 {
+				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 2")
 			}
 		}
 	} else {
@@ -357,16 +357,6 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 	}
 
 	return elapsedTime
-}
-
-// PrintResults : prints results of simulation
-func (s *ScenarioAgent) PrintResults() {
-	fmt.Println("Scenario Results:")
-	fmt.Println("------------------")
-	for i := range s.store.Checkouts {
-		fmt.Println("Total Money in Checkout", i, ": €", s.store.Checkouts[i].TotalMoney)
-	}
-	//...
 }
 
 func (s *ScenarioAgent) getEnvironmentalImpactOnArrival() float64 {

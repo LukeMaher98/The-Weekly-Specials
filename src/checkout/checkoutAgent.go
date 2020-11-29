@@ -11,21 +11,23 @@ import (
 )
 
 type CheckoutAgent struct {
-	SelfCheckout bool
-	AdultCheckout bool 
+	SelfCheckout       bool
+	AdultCheckout      bool
 	ProcessingCustomer bool
-	// These two do nothing right now 
+	// These two do nothing right now
 	CurrentCustomerProgress float64
-	AssistanceWaitTime float64
+	AssistanceWaitTime      float64
 
-	TotalMoney float64
-	FirstShiftCashier cashier.CashierAgent
+	TotalMoney         float64
+	FirstShiftCashier  cashier.CashierAgent
 	SecondShiftCashier cashier.CashierAgent
-	ManagerOnCashier manager.ManagerAgent
-	CurrentCustomer customer.CustomerAgent
+	ManagerOnCashier   manager.ManagerAgent
+	CurrentCustomer    customer.CustomerAgent
+
+	CustomersProcessed int
 }
 
-// checkout agent constructor 
+// checkout agent constructor
 func CreateInitialisedCheckoutAgent() CheckoutAgent {
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -42,7 +44,7 @@ func CreateInitialisedCheckoutAgent() CheckoutAgent {
 	co.FirstShiftCashier = cashier.CashierAgent{}
 	co.SecondShiftCashier = cashier.CashierAgent{}
 	co.ManagerOnCashier = manager.ManagerAgent{}
-	
+
 	return co
 }
 
@@ -50,18 +52,18 @@ func (co *CheckoutAgent) PropagateTime() {
 
 }
 
-func (co *CheckoutAgent) IsManned(currentShift int) bool{
-	Manned := false 
+func (co *CheckoutAgent) IsManned(currentShift int) bool {
+	Manned := false
 
 	if currentShift == 0 {
 		if ((cashier.CashierAgent{}) == co.FirstShiftCashier) && ((manager.ManagerAgent{}) == co.ManagerOnCashier) {
-			Manned = false 
+			Manned = false
 		} else {
 			Manned = true
 		}
 	} else {
 		if ((cashier.CashierAgent{}) == co.SecondShiftCashier) && ((manager.ManagerAgent{}) == co.ManagerOnCashier) {
-			Manned = false 
+			Manned = false
 		} else {
 			Manned = true
 		}
@@ -70,7 +72,7 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool{
 	return Manned
 }
 
-func (co* CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
+func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
 
 	for _, item := range co.CurrentCustomer.GetCustomerItems() {
 		co.CurrentCustomerProgress += item.GetItemHandling()
@@ -82,6 +84,7 @@ func (co* CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttribute
 
 	// Wait until current time is current time + Round(currentCustomerProgress)
 
+	co.CustomersProcessed++
 	co.ProcessingCustomer = false
-	
+
 }

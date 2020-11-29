@@ -20,5 +20,5 @@ func main() {
 		}
 	}
 
-	scenario.PrintResults()
+	scenario.Store.PrintResults()
 }
