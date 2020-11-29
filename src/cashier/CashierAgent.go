@@ -6,12 +6,13 @@ import (
 	"time"
 )
 
+// CashierAgent : the cashier struct
 type CashierAgent struct {
-	Amicability  float64
-	Competence   float64
-	CashHandling float64
-	CardHandling float64
-	ItemHandling float64
+	amicability  float64
+	competence   float64
+	cashHandling float64
+	cardHandling float64
+	managerBoost float64
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -20,11 +21,33 @@ var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 func NewCashier(amicUpper, amicLower, compUpper, compLower float64) CashierAgent {
 	cashier := CashierAgent{}
 
-	cashier.Amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
-	cashier.Competence = math.Round(((r.Float64()*(compUpper-compLower))+compLower)*100) / 100
-	cashier.CashHandling = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
-	cashier.CardHandling = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
-	cashier.ItemHandling = math.Round(((r.Float64()*0.5)+0.25)*100) / 100
+	cashier.amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
+	cashier.competence = math.Round(((r.Float64()*(compUpper-compLower))+compLower)*100) / 100
+	cashier.cashHandling = math.Round(((r.Float64()*0.25)+0.25)*100) / 100
+	cashier.cardHandling = math.Round(((r.Float64()*0.25)+0.25)*100) / 100
+	cashier.managerBoost = 1.00
 
 	return cashier
+}
+
+// PropogateTime : propogates time for the cashier
+func (cashier *CashierAgent) PropogateTime() {
+
+}
+
+// TimeToProcess : returns the time to process x items
+func (cashier *CashierAgent) TimeToProcess() float64 {
+	var processed float64 = (cashier.competence * cashier.managerBoost) * 10
+
+	return processed
+}
+
+// ManagerPresent : applies a boost to the cashier
+func (cashier *CashierAgent) ManagerPresent(boost float64) {
+	cashier.managerBoost = boost
+}
+
+// ManagerAbsent : reverts the boost to the cashier
+func (cashier *CashierAgent) ManagerAbsent() {
+	cashier.managerBoost = 1
 }

@@ -267,7 +267,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			} else if newScenario.cashierAttributeBounds.CompetanceUpperBound < newScenario.cashierAttributeBounds.CompetanceLowerBound ||
 				newScenario.cashierAttributeBounds.CompetanceUpperBound > 1.0 {
 				cCompetanceUpperBoundTemp := 0.0
-				fmt.Printf("Cashier Amicability Upper Bound [%v-1.0]> ", newScenario.cashierAttributeBounds.CompetanceLowerBound)
+				fmt.Printf("Cashier Competance Upper Bound [%v-1.0]> ", newScenario.cashierAttributeBounds.CompetanceLowerBound)
 				fmt.Scanln(&cCompetanceUpperBoundTemp)
 				if cCompetanceUpperBoundTemp >= newScenario.cashierAttributeBounds.CompetanceLowerBound && cCompetanceUpperBoundTemp <= 1.0 {
 					newScenario.cashierAttributeBounds.CompetanceUpperBound = cCompetanceUpperBoundTemp

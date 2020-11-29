@@ -15,6 +15,7 @@ type FloorStaff struct {
 	actualHelpfulness float64
 	Occupied          bool
 	Competence        float64
+	managerBoost      float64
 }
 
 var x = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -30,8 +31,11 @@ func NewFloorStaff() *FloorStaff {
 	staff.diligenceFactor = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
 	staff.BaseHelpfulness = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
 
+	//Initialised to 1
+	staff.managerBoost = 1
+
 	// Dynamically defined variables
-	staff.actualHelpfulness = calcActualHelpfulness(staff.diligenceFactor, staff.BaseHelpfulness)
+	staff.actualHelpfulness = calcActualHelpfulness(staff.diligenceFactor, staff.BaseHelpfulness, staff.managerBoost)
 
 	// Initialised False
 	staff.Occupied = false
@@ -51,8 +55,8 @@ func (staff *FloorStaff) SetOccupied(val bool) {
 }
 
 // Dynamically calculate the actual helpfulness of the floor agent
-func calcActualHelpfulness(diligenceFactor, baseHelpfulness float64) float64 {
-	return ((diligenceFactor + baseHelpfulness) / 2)
+func calcActualHelpfulness(diligenceFactor, baseHelpfulness, managerBoost float64) float64 {
+	return (((diligenceFactor + baseHelpfulness) * managerBoost) / 2)
 }
 
 // Print floor agent variables
@@ -65,11 +69,12 @@ func (staff *FloorStaff) PrintStaff() {
 	fmt.Printf("Cleaning Time:%.2f, Diligence Factor:%.2f, Base Helpfulness:%.2f, Actual Helpfulness:%.2f, Occupied Status:%t\n", ct, df, bh, ah, os)
 }
 
-// Code by Carl below
-type observer interface {
-	update(float64)
+// ManagerPresent : applies a boost to the cashier
+func (staff *FloorStaff) ManagerPresent(boost float64) {
+	staff.managerBoost = boost + 1.00
 }
 
-func (staff *FloorStaff) update(managerComp float64) {
-	//do something with manager competence
+// ManagerAbsent : reverts the boost to the cashier
+func (staff *FloorStaff) ManagerAbsent() {
+	staff.managerBoost = 1
 }

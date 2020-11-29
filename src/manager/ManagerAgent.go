@@ -3,65 +3,72 @@ package manager
 import (
 	"math"
 	"math/rand"
+	"src/cashier"
+	"src/floorStaff"
 	"time"
 )
 
+// ManagerAgent : the manager struct
 type ManagerAgent struct {
-	amicability float64
-	competence  float64
-	onFloor     bool
-	//WorkingCheckout checkout.CheckoutAgent
-	//SupervisingCashier cashier.CashierAgent
-
-	observerList []observer
+	amicability    float64
+	competence     float64
+	onFloor        bool
+	currentCashier *cashier.CashierAgent
+	floorStaff     []floorStaff.FloorStaff
+	cashiers       []cashier.CashierAgent
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // NewManager : creates new manager on floor
-func NewManager(amicUpper, amicLower, compUpper, compLower float64) ManagerAgent {
+func NewManager(amicUpper, amicLower, compUpper, compLower float64, staff []floorStaff.FloorStaff, cashiers []cashier.CashierAgent) ManagerAgent {
 	manager := ManagerAgent{}
 
 	manager.amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
 	manager.competence = math.Round(((r.Float64()*(compUpper-compLower))-compLower)*100) / 100
 	manager.onFloor = true
+	manager.floorStaff = staff
+	manager.cashiers = cashiers
 
 	return manager
 }
 
 // PropogateTime : propogates time for the manager
 func (mngr *ManagerAgent) PropogateTime() {
-	//check queue lengths, if queue.length > x && checkout empty man checkout
-
 	// 1/4 chance of moving
 	if r.Float64() < 0.25 {
 		if r.Float64() < 0.5 {
-			if mngr.onFloor == true {
-				mngr.onFloor = false
-			} else {
-				mngr.onFloor = true
-			}
+			mngr.WorkTheFloor()
 		} else {
-			//go to random checkout
+			mngr.SuperviseCashier()
 		}
 	}
 }
 
-func (mngr *ManagerAgent) WorkCheckout() {
-	//queues[] = getQueueLengths()
-}
+// WorkTheFloor : moves manager to floor or keeps them there
+func (mngr *ManagerAgent) WorkTheFloor() {
+	if !mngr.onFloor {
+		mngr.onFloor = true
+		mngr.currentCashier.ManagerAbsent()
+		mngr.currentCashier = nil
 
-func (mngr *ManagerAgent) register(o observer) {
-	mngr.observerList = append(mngr.observerList, o)
-}
-
-func (mngr *ManagerAgent) notifyAll() {
-	for _, observer := range mngr.observerList {
-		observer.update(mngr.competence)
+		for _, staff := range mngr.floorStaff {
+			staff.ManagerPresent(mngr.competence)
+		}
 	}
 }
 
-//clear whole slice at end of shift and repopulate from scratch
-func (mngr *ManagerAgent) clearSlice() {
-	mngr.observerList = nil
+// SuperviseCashier : manager supervises a checkout
+func (mngr *ManagerAgent) SuperviseCashier() {
+	if mngr.onFloor {
+		mngr.onFloor = false
+		for _, staff := range mngr.floorStaff {
+			staff.ManagerAbsent()
+		}
+	}
+
+	randomIndex := r.Intn(len(mngr.cashiers))
+	pick := mngr.cashiers[randomIndex]
+	mngr.currentCashier = &pick
+	mngr.currentCashier.ManagerPresent(mngr.amicability)
 }
