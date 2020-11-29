@@ -9,21 +9,22 @@ import (
 )
 
 type CustomerAgent struct {
-	Items                []item.ItemAgent
-	ImpairmentFactor     float64
-	CouponItem           float64
-	WithChildren         bool
-	LoyaltyCard          bool
-	BaseAmicability      float64
-	PreferredPayment     float64 //checkout or cashier don't have payment options rn?
-	EmergencyLeaveChance float64
-	EmergencyLeave       bool
-	Competence           float64
-	TrolleyLimit         int
-	CurrentTrolleyCount  int
-	FinishedShop         bool
-	InQueue              bool
-	FloorStaffNearby     floorStaff.FloorStaff
+	items            []item.ItemAgent
+	impairmentFactor float64
+	couponItem       float64
+	withChildren     bool
+	loyaltyCard      bool
+	baseAmicability  float64
+	preferredPayment float64 //checkout or cashier don't have payment options rn?
+	//customer age 		int       not implemented yet but could later otherwise item age rating has no meaning
+	emergencyLeaveChance float64
+	emergencyLeave       bool
+	competence           float64
+	trolleyLimit         int
+	currentTrolleyCount  int
+	finishedShop         bool
+	inQueue              bool
+	floorStaffNearby     floorStaff.FloorStaff
 }
 
 func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
@@ -32,24 +33,26 @@ func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	//static values
-	ca.ImpairmentFactor = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
-	ca.BaseAmicability = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
-	ca.PreferredPayment = math.Round((r.Float64()*2)*100) / 100
-	ca.Competence = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
-	ca.WithChildren = (r.Intn(2) == 1)
-	ca.LoyaltyCard = (r.Intn(2) == 1)
+	ca.impairmentFactor = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
+	ca.baseAmicability = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
+	ca.preferredPayment = math.Round((r.Float64()*2)*100) / 100
+	ca.competence = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
+	ca.withChildren = (r.Intn(2) == 1)
+	ca.loyaltyCard = (r.Intn(2) == 1)
 
-	ca.TrolleyLimit = r.Intn(UpperBound-LowerBound) + LowerBound
+	//ca.age = (r.Intn(100-14) + 14)
+
+	ca.trolleyLimit = r.Intn((UpperBound+1)-LowerBound) + LowerBound
 
 	//dynamic values
-	ca.EmergencyLeaveChance = 0.0
-	ca.CurrentTrolleyCount = 0
-	ca.EmergencyLeave = false
-	ca.FinishedShop = false
-	ca.InQueue = false
+	ca.emergencyLeaveChance = 0.0
+	ca.currentTrolleyCount = 0
+	ca.emergencyLeave = false
+	ca.finishedShop = false
+	ca.inQueue = false
 
 	//generate items
-	ca.Items = []item.ItemAgent{}
+	ca.items = []item.ItemAgent{}
 
 	return ca
 }
@@ -58,23 +61,23 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	//Add item to trolley
-	if ca.CurrentTrolleyCount <= ca.TrolleyLimit {
+	if ca.currentTrolleyCount < ca.trolleyLimit {
 		ca.addItemToTrolley(ItemHandlingUpper, ItemHandlingLower)
 	} else {
-		ca.FinishedShop = true
+		ca.finishedShop = true
 	}
 
 	//Emergency Leave the store
-	ca.EmergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
-	if ca.EmergencyLeaveChance > 0.95 {
-		ca.EmergencyLeave = true
+	ca.emergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
+	if ca.emergencyLeaveChance > 0.95 {
+		ca.emergencyLeave = true
 	}
 
 	//Replace item while in Queue
-	if ca.InQueue {
+	if ca.inQueue {
 		replaceItem := (math.Round((r.Float64()*1)*100) / 100)
 		if replaceItem > 0.95 {
-			ca.InQueue = false
+			ca.inQueue = false
 		}
 	}
 
@@ -94,50 +97,52 @@ func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 }
 
 func (ca *CustomerAgent) IsFinishedShopping() bool {
-	return ca.FinishedShop
+	return ca.finishedShop
 }
 
 func (ca *CustomerAgent) IsJoingQueue() {
-	ca.InQueue = true
+	ca.inQueue = true
 }
 
 func (ca *CustomerAgent) IsLeavingQueue() bool {
-	return ca.InQueue
+	return ca.inQueue
 }
 
 func (ca *CustomerAgent) EmergencyDeparture() bool {
-	return ca.EmergencyLeave
+	return ca.emergencyLeave
 }
 
 func (ca *CustomerAgent) GetCustomerItems() []item.ItemAgent {
-	return ca.Items
+	return ca.items
 }
 
 func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	var itemSkipped = 0.0
-	var isImpaired = ((ca.ImpairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
+	var isImpaired = ((ca.impairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
 	var helpedMultiplier = 0.0
 
-	isHelped := ca.FloorStaffNearby.Occupied
+	//isHelped := ca.floorStaffNearby.Occupied
 
-	if ca.WithChildren && isImpaired {
+	if ca.withChildren && isImpaired {
 		itemSkipped = math.Round((r.Float64()*1)*100) / 100
-	} else if ca.WithChildren || isImpaired {
+	} else if ca.withChildren || isImpaired {
 		itemSkipped = math.Round((r.Float64()*0.8)*100) / 100
 	} else {
 		itemSkipped = math.Round((r.Float64()*0.4)*100) / 100
 	}
 
-	if isHelped {
+	//just waiting for carl in order to see if I need to change this
+	/*	if isHelped {
 		if ca.BaseAmicability > 0.55 && ca.FloorStaffNearby.BaseHelpfulness > 0.55 {
 			helpedMultiplier = ca.Competence * ca.FloorStaffNearby.Competence
 		}
-	}
+	}*/
 
 	itemSkipped = itemSkipped - helpedMultiplier
 
 	if itemSkipped < 0.75 {
-		ca.Items = append(ca.Items, *item.NewItem(ItemHandlingUpper, ItemHandlingLower))
+		ca.currentTrolleyCount++
+		ca.items = append(ca.items, *item.NewItem(ItemHandlingUpper, ItemHandlingLower))
 	}
 }
