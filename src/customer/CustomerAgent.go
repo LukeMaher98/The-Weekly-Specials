@@ -143,6 +143,6 @@ func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlin
 
 	if itemSkipped < 0.75 {
 		ca.currentTrolleyCount++
-		ca.items = append(ca.items, *item.NewItem(ItemHandlingUpper, ItemHandlingLower))
+		ca.items = append(ca.items, item.NewItem(ItemHandlingUpper, ItemHandlingLower))
 	}
 }
