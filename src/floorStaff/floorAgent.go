@@ -1,7 +1,6 @@
 package floorStaff
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -9,58 +8,40 @@ import (
 
 // Floor Staff agent struct
 type FloorStaff struct {
-	cleaningTime      float64
-	diligenceFactor   float64
-	BaseHelpfulness   float64
-	actualHelpfulness float64
-	Occupied          bool
-	Competence        float64
+ 	Amicability float64
+	Competance float64
+	OccupyingCustomer bool
+	ManagerOccupied bool
 }
-
-var x = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // Floor Staff agent constructor
-func NewFloorStaff() *FloorStaff {
+func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) FloorStaff {
 
-	// Create staff agent
-	staff := FloorStaff{}
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Randomly initialised variables
-	staff.cleaningTime = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
-	staff.diligenceFactor = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
-	staff.BaseHelpfulness = math.Round(((x.Float64()*(0.75-0.25))+0.25)*100) / 100
+	// Create staff agent 
+	staff := FloorStaff {}
 
-	// Dynamically defined variables
-	staff.actualHelpfulness = calcActualHelpfulness(staff.diligenceFactor, staff.BaseHelpfulness)
+	// Randomly initialised variables based on boundings
+	staff.Amicability = math.Round(((r.Float64()*(AmicUB-AmicLB))+AmicLB)*100) / 100
+	staff.Competance = math.Round(((r.Float64()*(CompUB-CompLB))+CompLB)*100) / 100
 
 	// Initialised False
-	staff.Occupied = false
+	staff.OccupyingCustomer = false
+	staff.ManagerOccupied = false 
 
 	// Return staff object
-	return &staff
+	return staff
 }
 
-// Getter for staff occupied status
-func (staff *FloorStaff) GetOccupied() bool {
-	return staff.Occupied
-}
+// Placeholder stuff 
+func (fs *FloorStaff) PropagateTime() {
 
-// Setter for staff occupied status
-func (staff *FloorStaff) SetOccupied(val bool) {
-	staff.Occupied = val
-}
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-// Dynamically calculate the actual helpfulness of the floor agent
-func calcActualHelpfulness(diligenceFactor, baseHelpfulness float64) float64 {
-	return ((diligenceFactor + baseHelpfulness) / 2)
-}
+	// 50% chance to change occupied status
+	if r.Float64() < fs.Amicability {
+		fs.OccupyingCustomer = !fs.OccupyingCustomer
+	}
 
-// Print floor agent variables
-func (staff *FloorStaff) PrintStaff() {
-	var ct = staff.cleaningTime
-	var df = staff.diligenceFactor
-	var bh = staff.BaseHelpfulness
-	var ah = staff.actualHelpfulness
-	var os = staff.Occupied
-	fmt.Printf("Cleaning Time:%.2f, Diligence Factor:%.2f, Base Helpfulness:%.2f, Actual Helpfulness:%.2f, Occupied Status:%t\n", ct, df, bh, ah, os)
 }

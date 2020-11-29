@@ -339,10 +339,14 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 	if s.currentTime >= s.openingTime*60 && s.currentTime <= s.closingTime*60 {
 		if s.currentTime < (s.openingTime*60 + ((s.closingTime - s.openingTime) * 30)) {
 			s.store.PropagateTime(0, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
-			fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 0")
+			if (math.Mod(s.currentTime, 60) == 0){
+				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 0")
+			}
 		} else {
 			s.store.PropagateTime(1, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
-			fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
+			if (math.Mod(s.currentTime, 60) == 0){
+				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
+			}
 		}
 	} else {
 		elapsedTime += closedTime - 1
@@ -359,6 +363,9 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 func (s *ScenarioAgent) PrintResults() {
 	fmt.Println("Scenario Results:")
 	fmt.Println("------------------")
+	for i := range s.store.Checkouts {
+		fmt.Println("Total Money in Checkout", i, ": €", s.store.Checkouts[i].TotalMoney)
+	}
 	//...
 }
 

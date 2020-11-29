@@ -3,6 +3,7 @@ package store
 import (
 	"math"
 	"math/rand"
+	"src/cashier"
 	"src/checkout"
 	"src/constants"
 	"src/floorStaff"
@@ -70,29 +71,35 @@ func CreateInitialisedStoreAgent(
 	newStore.ItemTimeBounds = itemTimes
 
 	for i := 0; i < checkoutCount; i++ {
-		//newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent())
+		newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent())
 	}
 
 	for i := 0; i < cashierShifts.FirstShiftCount; i++ {
 		newStore.CustomerQueues = append(newStore.CustomerQueues, []customer.CustomerAgent{})
-		//newStore.Checkouts[i].FirstShiftCashier = cashier.CreateInitialisedCashierAgent( ... )
+		newStore.Checkouts[i].FirstShiftCashier = cashier.CreateInitialisedCashierAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
 	}
 
 	for i := 0; i < cashierShifts.SecondShiftCount; i++ {
-		//newStore.Checkouts[i].SecondShiftCashier = cashier.CreateInitialisedCashierAgent( ... )
+		newStore.Checkouts[i].SecondShiftCashier = cashier.CreateInitialisedCashierAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+			floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
 	}
 
 	for i := 0; i < floorStaffShifts.FirstShiftCount; i++ {
-		//newStore.FloorStaffFirstShift = append(newStore.FloorStaffFirstShift, floorStaff.CreateInitialisedFloorStaffAgent( ... ))
+		newStore.FloorStaffFirstShift = append(newStore.FloorStaffFirstShift, floorStaff.CreateInitialisedFloorStaffAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+			floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound))
 	}
 
 	for i := 0; i < floorStaffShifts.SecondShiftCount; i++ {
-		//newStore.FloorStaffSecondShift = append(newStore.FloorStaffSecondShift, floorStaff.CreateInitialisedFloorStaffAgent( ... ))
+		newStore.FloorStaffSecondShift = append(newStore.FloorStaffSecondShift, floorStaff.CreateInitialisedFloorStaffAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+			floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound))
 	}
 
-	//newStore.FloorManagerFirstShift = floorManager.CreateInitialisedFloorManagerAgent( ... )
+	newStore.ManagerFirstShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
 
-	//newStore.FloorManagerSecondShift = floorManager.CreateInitialisedFloorManagerAgent( ... )
+	newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	arrivalRange := float64(arrivalRates.UpperBound - arrivalRates.LowerBound)
@@ -103,6 +110,17 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
+	// for i := range s.CustomerQueues {
+	// 	if(len(s.CustomerQueues[i]) > 0){
+	// 		fmt.Println("Floor Customers:", len(s.CustomersOnFloor))
+	// 		fmt.Println("Lost Customers:", len(s.CustomersLost))
+	// 		fmt.Println("RTQ Customers:", len(s.CustomersReadyToQueue))
+	// 		for i := range s.CustomerQueues {
+	// 			fmt.Println("Queue:", i, len(s.CustomerQueues[i]))
+	// 		}
+	// 	}
+	// }
+
 	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
 	s.propagateStore(currentShift, currentDay, currentTime)
 	s.propagateCustomerQueues(currentShift, currentDay, currentTime)
@@ -154,24 +172,28 @@ func (s *StoreAgent) checkNewCustomers(rateOfArrival float64) {
 }
 
 func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, currentTime float64) {
-	for index, customer := range s.CustomersOnFloor {
-		if customer.EmergencyDeparture() {
-			s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Emergency"})
-			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:]...)
+	removedCount := 0
+	for i := range s.CustomersOnFloor {
+		i = i - removedCount
+		if s.CustomersOnFloor[i].EmergencyDeparture() {
+			s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: s.CustomersOnFloor[i], Day: currentDay, Time: currentTime, Reason: "Emergency"})
+			s.CustomersOnFloor = append(s.CustomersOnFloor[:i], s.CustomersOnFloor[i+1:]...)
+			removedCount++
 			continue
-		} else if customer.IsFinishedShopping() {
-			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, customer)
-			s.CustomersOnFloor = append(s.CustomersOnFloor[:index], s.CustomersOnFloor[index+1:]...)
+		} else if s.CustomersOnFloor[i].IsFinishedShopping() {
+			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, s.CustomersOnFloor[i])
+			s.CustomersOnFloor = append(s.CustomersOnFloor[:i], s.CustomersOnFloor[i+1:]...)
+			removedCount++
 		}
 	}
 
 	openCheckoutNum := 0
 
-	/*for _, checkout := range s.Checkouts {
+	for _, checkout := range s.Checkouts {
 		if checkout.IsManned(currentShift) {
 			openCheckoutNum++
 		}
-	}*/
+	}
 
 	queueLengths := s.getQueueLengths()
 
@@ -188,7 +210,9 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 		}
 	}
 
+	removedCustomers := 0
 	for index, customer := range s.CustomersReadyToQueue {
+		index = index - removedCustomers
 		if customer.EmergencyDeparture() {
 			s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Emergency"})
 			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
@@ -200,62 +224,81 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 			} else {
 				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Queues too long"})
 			}
-			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
+			if (index == len(s.CustomersReadyToQueue)) {
+				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:], s.CustomersReadyToQueue[:index]...)
+			} else {
+				s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:index], s.CustomersReadyToQueue[index+1:]...)
+			}
+			removedCustomers++
 		}
 	}
 
-	for _, queue := range s.CustomerQueues {
-		for index, customer := range queue {
-			if customer.EmergencyDeparture() {
-				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: customer, Day: currentDay, Time: currentTime, Reason: "Emergency"})
-				queue = append(queue[:index], queue[index+1:]...)
+	for i := range s.CustomerQueues {
+		removedCustomers = 0
+		for j := range s.CustomerQueues[i] {
+			j = j - removedCustomers
+			if s.CustomerQueues[i][j].EmergencyDeparture() {
+				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{Customer: s.CustomerQueues[i][j], Day: currentDay, Time: currentTime, Reason: "Emergency"})
+				if (j == len(s.CustomerQueues[i])) {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:], s.CustomerQueues[i][:j]...)
+				} else {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:j], s.CustomerQueues[i][j+1:]...)
+				}
+				removedCustomers++
 				continue
-			} else if customer.IsLeavingQueue() {
-				s.CustomersOnFloor = append(s.CustomersReadyToQueue, customer)
-				queue = append(queue[:index], queue[index+1:]...)
+			} else if s.CustomerQueues[i][j].IsLeavingQueue() {
+				s.CustomersOnFloor = append(s.CustomersReadyToQueue, s.CustomerQueues[i][j])
+				if (j == len(s.CustomerQueues[i])) {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:], s.CustomerQueues[i][:j]...)
+				} else {
+					s.CustomerQueues[i] = append(s.CustomerQueues[i][:j], s.CustomerQueues[i][j+1:]...)
+				}
+				removedCustomers++
 			}
 		}
 	}
 }
 
 func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay int, currentTime float64) {
-	/*for index, checkout := range s.Checkouts {
-		if checkout.ProcessingCustomer == false {
-			checkout.CurrentCustomerProgress = 0
-			if len(s.CustomerQueues[index]) > 0 {
-				checkout.CurrentCustomer = s.CustomerQueues[index][0]
-				s.CustomerQueues[index] = s.CustomerQueues[index][1:]
+	for i := range s.Checkouts {
+		if s.Checkouts[i].ProcessingCustomer == false {
+			s.Checkouts[i].CurrentCustomerProgress = 0
+			if len(s.CustomerQueues[i]) > 0 {
+				s.Checkouts[i].CurrentCustomer = s.CustomerQueues[i][0]
+				s.CustomerQueues[i] = s.CustomerQueues[i][1:]
 			}
-			checkout.ProcessingCustomer = true
-			go checkout.ProcessCustomer(s.ItemTimeBounds)
+			//fmt.Println(s.Checkouts[i].CurrentCustomer)
+			s.Checkouts[i].ProcessingCustomer = true
+			go s.Checkouts[i].ProcessCustomer(s.ItemTimeBounds)
+			// print(s.Checkouts[i].TotalMoney)
 		}
-	}*/
+	}
 }
 
 func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTime float64) {
-	for _, customer := range s.CustomersOnFloor {
-		customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
+	for i := range s.CustomersOnFloor {
+		s.CustomersOnFloor[i].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}
 
 	if currentShift == 0 {
-		/*for _, staff := range s.FloorStaffFirstShift {
+		for _, staff := range s.FloorStaffFirstShift {
 			staff.PropagateTime()
 		}
-		s.ManagerFirstShift.PropagateTime()*/
+		s.ManagerFirstShift.PropagateTime()
 	} else {
-		/*for _, staff := range s.FloorStaffSecondShift {
+		for _, staff := range s.FloorStaffSecondShift {
 			staff.PropagateTime()
 		}
-		s.ManagerSecondShift.PropagateTime()*/
+		s.ManagerSecondShift.PropagateTime()
 	}
 
-	for _, customer := range s.CustomersReadyToQueue {
-		customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
+	for i := range s.CustomersReadyToQueue {
+		s.CustomersReadyToQueue[i].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}
 
-	for _, queue := range s.CustomerQueues {
-		for _, customer := range queue {
-			customer.PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
+	for i, queue := range s.CustomerQueues {
+		for j := range queue {
+			s.CustomerQueues[i][j].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 		}
 	}
 }
