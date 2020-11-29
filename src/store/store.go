@@ -105,8 +105,12 @@ func CreateInitialisedStoreAgent(
         newStore.FloorStaffFirstShift, newStore.Checkouts, 2)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
-	arrivalRange := float64(arrivalRates.UpperBound - arrivalRates.LowerBound)
-	newStore.baseArrivalRate = math.Round((seed.Float64()*arrivalRange)+float64(arrivalRates.LowerBound)) / float64(60)
+	if arrivalRates.UpperBound != arrivalRates.LowerBound {
+		arrivalRange := float64(arrivalRates.UpperBound - arrivalRates.LowerBound)
+		newStore.baseArrivalRate = math.Round((seed.Float64()*arrivalRange)+float64(arrivalRates.LowerBound)) / float64(60)
+	} else {
+		newStore.baseArrivalRate = float64(arrivalRates.LowerBound) / float64(60)
+	}
 
 	return newStore
 }

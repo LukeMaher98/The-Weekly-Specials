@@ -13,8 +13,7 @@ type ScenarioAgent struct {
 	ScenarioDuration            int
 	ScenarioActive              bool
 	startingDay                 int
-	startingTime                float64
-	openingTime                 float64
+	OpeningTime                 float64
 	closingTime                 float64
 	weatherConditions           float64
 	socialConditions            float64
@@ -39,7 +38,7 @@ type ScenarioAgent struct {
 
 // CreateScenarioAgent : creates 'empty' Scenario for initialisation
 func CreateScenarioAgent() ScenarioAgent {
-	return ScenarioAgent{-1, false, -1, -1.0, -1.0, -1.0, -2.0, -2.0, -1, 0,
+	return ScenarioAgent{-1, false, -1, -1.0, -1.0, -2.0, -2.0, -1, 0,
 		constants.StoreAttributeBoundsInt{UpperBound: 0, LowerBound: 0},
 		constants.StoreAttributeBoundsFloat{UpperBound: 0.0, LowerBound: 0.0},
 		constants.StoreAttributeBoundsInt{UpperBound: -1, LowerBound: -1},
@@ -81,25 +80,18 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			if startingDayTemp > -1 && startingDayTemp < 7 {
 				newScenario.startingDay = startingDayTemp
 			}
-		} else if !(newScenario.startingTime >= 0.0 && newScenario.startingTime <= 24.0) {
-			startingTimeTemp := -1.0
-			fmt.Print("Starting Time of Day for Simulation [0.0-24.0]> ")
-			fmt.Scanln(&startingTimeTemp)
-			if startingTimeTemp >= 0.0 && startingTimeTemp <= 24.0 {
-				newScenario.startingTime = startingTimeTemp
-			}
-		} else if !(newScenario.openingTime >= 0.0 && newScenario.openingTime <= 24.0) {
+		} else if !(newScenario.OpeningTime >= 0.0 && newScenario.OpeningTime <= 24.0) {
 			openingTimeTemp := -1.0
 			fmt.Print("Opening Time [0.0-24.0]> ")
 			fmt.Scanln(&openingTimeTemp)
 			if openingTimeTemp >= 0.0 && openingTimeTemp <= 24.0 {
-				newScenario.openingTime = openingTimeTemp
+				newScenario.OpeningTime = openingTimeTemp
 			}
-		} else if !(newScenario.closingTime >= newScenario.openingTime && newScenario.closingTime <= 24.0) {
+		} else if !(newScenario.closingTime >= newScenario.OpeningTime && newScenario.closingTime <= 24.0) {
 			closingTimeTemp := -1.0
-			fmt.Printf("Closing Time [%v-24.0]> ", newScenario.openingTime)
+			fmt.Printf("Closing Time [%v-24.0]> ", newScenario.OpeningTime)
 			fmt.Scanln(&closingTimeTemp)
-			if closingTimeTemp >= newScenario.openingTime && closingTimeTemp <= 24.0 {
+			if closingTimeTemp >= newScenario.OpeningTime && closingTimeTemp <= 24.0 {
 				newScenario.closingTime = closingTimeTemp
 			}
 		} else if !(newScenario.weatherConditions >= -1.0 && newScenario.weatherConditions <= 1.0) {
@@ -331,13 +323,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 
 // PropagateTime : propagates time through simulation
 func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
-	closedTime := 1440 - (s.closingTime*60 - s.openingTime*60)
+
+	closedTime := 1440 - (s.closingTime*60 - s.OpeningTime*60)
 	elapsedTime := elapsed + 1
 
-	s.currentDay = ((int(elapsedTime+s.startingTime*60) / 1440) + s.startingDay) % 7
-	s.currentTime = math.Mod((elapsedTime + s.startingTime*60), 1440.0)
-	if s.currentTime >= s.openingTime*60 && s.currentTime <= s.closingTime*60 {
-		if s.currentTime < (s.openingTime*60 + ((s.closingTime - s.openingTime) * 30)) {
+	s.currentDay = ((int(elapsedTime) / 1440) + s.startingDay) % 7
+	s.currentTime = math.Mod((elapsedTime), 1440.0)
+	if s.currentTime >= s.OpeningTime*60 && s.currentTime <= s.closingTime*60 {
+		if s.currentTime < (s.OpeningTime*60 + ((s.closingTime - s.OpeningTime) * 30)) {
 			s.Store.PropagateTime(0, s.currentDay, s.currentTime, s.getEnvironmentalImpactOnArrival())
 			if math.Mod(s.currentTime, 60) == 0 {
 				fmt.Println("Day of Week: ", s.currentDay, "Time of Day ", s.currentTime, "Current shift: 1")
