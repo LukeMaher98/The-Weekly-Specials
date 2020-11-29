@@ -3,48 +3,85 @@ package checkout
 import (
 	"math"
 	"math/rand"
+	"src/cashier"
+	"src/constants"
+	"src/customer"
+	"src/manager"
 	"time"
 )
 
 type CheckoutAgent struct {
-	selfCheckout       bool
-	adultCheckout      bool
-	assistanceWaitTime float64
-	totalMoney         float64
-	// currentCashier cashier
+	SelfCheckout bool
+	AdultCheckout bool 
+	ProcessingCustomer bool
+	// These two do nothing right now 
+	CurrentCustomerProgress float64
+	AssistanceWaitTime float64
+
+	TotalMoney float64
+	FirstShiftCashier cashier.CashierAgent
+	SecondShiftCashier cashier.CashierAgent
+	ManagerOnCashier manager.ManagerAgent
+	CurrentCustomer customer.CustomerAgent
 }
 
-var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+// checkout agent constructor 
+func CreateInitialisedCheckoutAgent() CheckoutAgent {
 
-// checkout agent constructor
-func NewCheckout() *CheckoutAgent {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	co := CheckoutAgent{}
 
 	// Randomly Initialised Variables
-	co.selfCheckout = (r.Intn(2) == 1)
-	co.adultCheckout = (r.Intn(2) == 1)
-	co.assistanceWaitTime = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
-	co.totalMoney = 0
-
-	return &co
+	co.SelfCheckout = false
+	co.AdultCheckout = (r.Intn(2) == 1)
+	co.ProcessingCustomer = false
+	co.CurrentCustomerProgress = 0
+	co.AssistanceWaitTime = math.Round(((r.Float64()*(0.75-0.25))+0.25)*100) / 100
+	co.TotalMoney = 0
+	co.FirstShiftCashier = cashier.CashierAgent{}
+	co.SecondShiftCashier = cashier.CashierAgent{}
+	co.ManagerOnCashier = manager.ManagerAgent{}
+	
+	return co
 }
 
-// Getter for selfCheckout
-func (co *CheckoutAgent) IsSelfCheckout() bool {
-	return co.selfCheckout
+func (co *CheckoutAgent) PropagateTime() {
+
 }
 
-// Getter for adultCheckout
-func (co *CheckoutAgent) IsAdultCheckout() bool {
-	return co.adultCheckout
+func (co *CheckoutAgent) IsManned(currentShift int) bool{
+	Manned := false 
+
+	if currentShift == 0 {
+		if ((cashier.CashierAgent{}) == co.FirstShiftCashier) && ((manager.ManagerAgent{}) == co.ManagerOnCashier) {
+			Manned = false 
+		} else {
+			Manned = true
+		}
+	} else {
+		if ((cashier.CashierAgent{}) == co.SecondShiftCashier) && ((manager.ManagerAgent{}) == co.ManagerOnCashier) {
+			Manned = false 
+		} else {
+			Manned = true
+		}
+	}
+
+	return Manned
 }
 
-// Add money of an item to the checkout
-func (co *CheckoutAgent) AddMoney(price float64) {
-	co.totalMoney += price
-}
+func (co* CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
 
-// Get the money currently in the checkout
-func (co *CheckoutAgent) GetMoney() float64 {
-	return co.totalMoney
+	for _, item := range co.CurrentCustomer.GetCustomerItems() {
+		co.CurrentCustomerProgress += item.GetItemHandling()
+		co.TotalMoney += item.GetPrice()
+	}
+
+	// 1 clock = 60 seconds, dividing by 10 for a [0.5-6] second time to scan per item depending on the handling
+	co.CurrentCustomerProgress /= 10
+
+	// Wait until current time is current time + Round(currentCustomerProgress)
+
+	co.ProcessingCustomer = false
+	
 }
