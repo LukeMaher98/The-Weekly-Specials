@@ -90,13 +90,22 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 
 func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	selectedQueue := 0
+
+	queueLengths := QueueLengths
+	adjVal := 0
+
+	if ca.trolleyLimit > 25 {
+		queueLengths = QueueLengths[1:]
+		adjVal = 1
+	}
+
 	currentQueueLength := QueueLengths[0]
 	var queuesOfSameLength []int
 
-	for i, s := range QueueLengths {
+	for i, s := range queueLengths {
 		if s < currentQueueLength {
 			selectedQueue = i
-			currentQueueLength = QueueLengths[i]
+			currentQueueLength = queueLengths[i]
 			queuesOfSameLength = nil
 		} else if s == currentQueueLength {
 			queuesOfSameLength = append(queuesOfSameLength, i)
@@ -108,7 +117,7 @@ func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 		}
 	}
 
-	return selectedQueue
+	return selectedQueue + adjVal
 }
 
 func (ca *CustomerAgent) GetAge() int {
@@ -148,7 +157,7 @@ func (ca *CustomerAgent) GetAmicability() float64 {
 }
 
 func (ca *CustomerAgent) TimeToProcess() float64 {
-	return 1.2 - ((ca.competence ) / 2.5)
+	return 1.2 - ((ca.competence) / 2.5)
 }
 
 func (ca *CustomerAgent) addItemsToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {

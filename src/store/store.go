@@ -72,7 +72,11 @@ func CreateInitialisedStoreAgent(
 	newStore.ItemTimeBounds = itemTimes
 
 	for i := 0; i < checkoutCount; i++ {
-		newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent())
+		if checkoutCount > 1 && i == 0 {
+			newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent(true))
+		} else {
+			newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent(false))
+		}
 	}
 
 	for i := 0; i < cashierShifts.FirstShiftCount; i++ {
@@ -274,7 +278,11 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay i
 				s.CustomerQueues[checkoutIndex] = s.CustomerQueues[checkoutIndex][1:]
 			}
 			s.Checkouts[checkoutIndex].ProcessingCustomer = true
-			go s.Checkouts[checkoutIndex].ProcessCustomer(currentShift)
+			if s.Checkouts[checkoutIndex].SelfCheckout == true {
+				go s.Checkouts[checkoutIndex].ProcessSelf(currentShift)
+			} else {
+				go s.Checkouts[checkoutIndex].ProcessCustomer(currentShift)
+			}
 		}
 	}
 }
