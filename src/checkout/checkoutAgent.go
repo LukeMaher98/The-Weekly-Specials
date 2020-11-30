@@ -7,17 +7,18 @@ import (
 )
 
 type CheckoutAgent struct {
-	ProcessingCustomer bool
+	ProcessingCustomer      bool
 	CurrentCustomerProgress float64
-	TotalMoney         float64
-	FirstShiftCashier  cashier.CashierAgent
-	SecondShiftCashier cashier.CashierAgent
-	CurrentCustomer    customer.CustomerAgent
-	CustomersProcessed int
+	TotalMoney              float64
+	FirstShiftCashier       cashier.CashierAgent
+	SecondShiftCashier      cashier.CashierAgent
+	CurrentCustomer         customer.CustomerAgent
+	CustomersProcessed      int
+	SelfCheckout            bool
 }
 
 // checkout agent constructor
-func CreateInitialisedCheckoutAgent() CheckoutAgent {
+func CreateInitialisedCheckoutAgent(isSelfCheckout bool) CheckoutAgent {
 	co := CheckoutAgent{}
 
 	// Randomly Initialised Variables
@@ -26,6 +27,7 @@ func CreateInitialisedCheckoutAgent() CheckoutAgent {
 	co.TotalMoney = 0
 	co.FirstShiftCashier = cashier.CashierAgent{}
 	co.SecondShiftCashier = cashier.CashierAgent{}
+	co.SelfCheckout = isSelfCheckout
 
 	return co
 }
@@ -58,7 +60,7 @@ func (co *CheckoutAgent) ProcessCustomer(shift int) {
 			customerTotal := 0.0
 			for _, item := range co.CurrentCustomer.GetCustomerItems() {
 				if co.CurrentCustomer.GetAge() < 18 && item.IsAgeRated() {
-					// Skips item 
+					// Skips item
 				} else {
 					co.CurrentCustomerProgress += item.GetItemHandling()
 					customerTotal += item.GetPrice()
@@ -68,15 +70,15 @@ func (co *CheckoutAgent) ProcessCustomer(shift int) {
 
 			sleepTime := time.Millisecond
 			if shift == 0 {
-				sleepTime = time.Duration(int((co.CurrentCustomerProgress/60) * co.FirstShiftCashier.TimeToProcess()))
+				sleepTime = time.Duration(int((co.CurrentCustomerProgress / 60) * co.FirstShiftCashier.TimeToProcess()))
 			} else if shift == 1 {
-				sleepTime = time.Duration(int((co.CurrentCustomerProgress/60) * co.SecondShiftCashier.TimeToProcess()))
+				sleepTime = time.Duration(int((co.CurrentCustomerProgress / 60) * co.SecondShiftCashier.TimeToProcess()))
 			}
 
 			if co.CurrentCustomer.GetCashPreference() {
-				sleepTime += time.Duration(1.2 - ((co.FirstShiftCashier.GetAmicability() * co.CurrentCustomer.GetAmicability()) / 2.5)) / 20
+				sleepTime += time.Duration(1.2-((co.FirstShiftCashier.GetAmicability()*co.CurrentCustomer.GetAmicability())/2.5)) / 20
 			} else {
-				sleepTime += time.Duration(1.2 - ((co.FirstShiftCashier.GetAmicability() * co.CurrentCustomer.GetAmicability()) / 2.5)) / 60
+				sleepTime += time.Duration(1.2-((co.FirstShiftCashier.GetAmicability()*co.CurrentCustomer.GetAmicability())/2.5)) / 60
 			}
 
 			time.Sleep(sleepTime * time.Millisecond)
@@ -97,7 +99,7 @@ func (co *CheckoutAgent) ProcessSelf(shift int) {
 			customerTotal := 0.0
 			for _, item := range co.CurrentCustomer.GetCustomerItems() {
 				if co.CurrentCustomer.GetAge() < 18 && item.IsAgeRated() {
-					// Skips item 
+					// Skips item
 				} else {
 					co.CurrentCustomerProgress += item.GetItemHandling()
 					customerTotal += item.GetPrice()
@@ -107,9 +109,9 @@ func (co *CheckoutAgent) ProcessSelf(shift int) {
 
 			sleepTime := time.Millisecond
 			if shift == 0 {
-				sleepTime = time.Duration(int((co.CurrentCustomerProgress/30) * co.CurrentCustomer.TimeToProcess()))
+				sleepTime = time.Duration(int((co.CurrentCustomerProgress / 30) * co.CurrentCustomer.TimeToProcess()))
 			} else if shift == 1 {
-				sleepTime = time.Duration(int((co.CurrentCustomerProgress/30) * co.CurrentCustomer.TimeToProcess()))
+				sleepTime = time.Duration(int((co.CurrentCustomerProgress / 30) * co.CurrentCustomer.TimeToProcess()))
 			}
 
 			if co.CurrentCustomer.GetCashPreference() {
