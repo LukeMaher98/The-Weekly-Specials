@@ -28,7 +28,7 @@ func (ia *ItemAgent) GetItemHandling() float64 {
 	return ia.handling
 }
 
-func (ia *ItemAgent) GetAgeRating() bool {
+func (ia *ItemAgent) IsAgeRated() bool {
 	return ia.eighteenPlus
 }
 
