@@ -64,14 +64,14 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 
 	//Add item to trolley
 	if ca.currentTrolleyCount < ca.trolleyLimit {
-		ca.addItemToTrolley(ItemHandlingUpper, ItemHandlingLower)
+		ca.addItemsToTrolley(ItemHandlingUpper, ItemHandlingLower)
 	} else {
 		ca.finishedShop = true
 	}
 
 	//Emergency Leave the store
 	ca.emergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
-	if ca.emergencyLeaveChance > 0.95 {
+	if ca.emergencyLeaveChance > 0.9999 {
 		ca.emergencyLeave = true
 	}
 
@@ -91,10 +91,20 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	selectedQueue := 0
 	currentQueueLength := QueueLengths[0]
+	var queuesOfSameLength []int
 
 	for i, s := range QueueLengths {
-		if s <= currentQueueLength {
+		if s < currentQueueLength {
 			selectedQueue = i
+			currentQueueLength = QueueLengths[i]
+			queuesOfSameLength = nil
+		} else if s == currentQueueLength {
+			queuesOfSameLength = append(queuesOfSameLength, i)
+		}
+
+		if queuesOfSameLength != nil {
+			randomIndex := rand.Intn(len(queuesOfSameLength))
+			selectedQueue = queuesOfSameLength[randomIndex]
 		}
 	}
 
@@ -137,49 +147,52 @@ func (ca *CustomerAgent) GetAmicability() float64 {
 	return ca.amicability
 }
 
-func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {
-	var isImpaired = ((ca.impairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
-	var itemAddBoost = 0.0
-	var chanceItemAdded = 1.0
-	var underAge = ca.age < 18
+func (ca *CustomerAgent) addItemsToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {
+	var itemsAddedToTrolley = r.Intn(5) + 1
 
-	var abilityToAddAgeRestrictedItem = false
+	for i := 0; i < itemsAddedToTrolley; i++ {
+		var isImpaired = ((ca.impairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
+		var itemAddBoost = 0.0
+		var chanceItemAdded = 1.0
+		var underAge = ca.age < 18
+		var abilityToAddAgeRestrictedItem = false
 
-	if !underAge {
-		abilityToAddAgeRestrictedItem = true
-	}
-
-	if ca.withChildren && isImpaired {
-		chanceItemAdded -= math.Round((r.Float64()*0.8)*100) / 100
-	} else if ca.withChildren || isImpaired {
-		chanceItemAdded -= math.Round((r.Float64()*0.5)*100) / 100
-	} else {
-		chanceItemAdded -= math.Round((r.Float64()*0.3)*100) / 100
-	}
-
-	if ca.Occupied {
-		if ca.amicability*ca.FloorStaffNearby.GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
-			itemAddBoost = 1 + (ca.competence * ca.FloorStaffNearby.GetCompetence())
-		}
-	} else {
-		itemAddBoost = 1 + (ca.competence / 5)
-	}
-
-	chanceItemAdded *= itemAddBoost
-
-	if chanceItemAdded > 0.3 {
-
-		var newAddedItem = item.NewItem(ItemHandlingUpper, ItemHandlingLower)
-		if underAge && newAddedItem.IsAgeRated() {
-			abilityToAddAgeRestrictedItem = (math.Round((r.Float64()*1)*100) / 100) > 0.95
+		if !underAge {
+			abilityToAddAgeRestrictedItem = true
 		}
 
-		if !newAddedItem.IsAgeRated() {
-			ca.items = append(ca.items, newAddedItem)
-			ca.currentTrolleyCount++
-		} else if abilityToAddAgeRestrictedItem {
-			ca.items = append(ca.items, newAddedItem)
-			ca.currentTrolleyCount++
+		if ca.withChildren && isImpaired {
+			chanceItemAdded -= math.Round((r.Float64()*0.8)*100) / 100
+		} else if ca.withChildren || isImpaired {
+			chanceItemAdded -= math.Round((r.Float64()*0.5)*100) / 100
+		} else {
+			chanceItemAdded -= math.Round((r.Float64()*0.3)*100) / 100
+		}
+
+		if ca.Occupied {
+			if ca.amicability*ca.FloorStaffNearby.GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+				itemAddBoost = 1 + (ca.competence * ca.FloorStaffNearby.GetCompetence())
+			}
+		} else {
+			itemAddBoost = 1 + (ca.competence / 5)
+		}
+
+		chanceItemAdded *= itemAddBoost
+
+		if chanceItemAdded > 0.3 {
+			var newAddedItem = item.NewItem(ItemHandlingUpper, ItemHandlingLower)
+
+			if underAge && newAddedItem.IsAgeRated() {
+				abilityToAddAgeRestrictedItem = (math.Round((r.Float64()*1)*100) / 100) > 0.95
+			}
+
+			if !newAddedItem.IsAgeRated() {
+				ca.items = append(ca.items, newAddedItem)
+				ca.currentTrolleyCount++
+			} else if abilityToAddAgeRestrictedItem {
+				ca.items = append(ca.items, newAddedItem)
+				ca.currentTrolleyCount++
+			}
 		}
 	}
 }
