@@ -70,8 +70,8 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 	}
 
 	//Emergency Leave the store
-	ca.emergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
-	if ca.emergencyLeaveChance > 0.9999 {
+	ca.emergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100.00000000000000)
+	if ca.emergencyLeaveChance > 0.99999999999999 {
 		ca.emergencyLeave = true
 	}
 

@@ -18,8 +18,8 @@ func NewItem(UpperBound float64, LowerBound float64) ItemAgent {
 	ia := ItemAgent{}
 
 	ia.eighteenPlus = setAgeLimit()
-	ia.price = math.Round((r.Float64()*10)*100) / 100
-	ia.handling = math.Round(((r.Float64()*((UpperBound+1)-LowerBound))+LowerBound)*100) / 100
+	ia.price = math.Round((r.Float64()*10)*100) / 250
+	ia.handling = math.Round(((r.Float64()*((UpperBound+1)-LowerBound))+LowerBound)*100) / 1000
 
 	return ia
 }

@@ -5,8 +5,9 @@ The-Weekly-Specials
 -Carl Frohburg  (17237823)
 
 How to use:
--From the command line run the project using the "go run main.go" command.
--Enter values in the required ranges for each input as they appear on screen. 
+-From the command line run the project using the "go run main.go" command after changing to the src directory.
+-Enter values in the required ranges for each input as they appear on screen.
+    (Staff attribute definition is optional) 
     (Inputs expecting a float will have a decimal point shown in the required range, inputs expecting an int will not)
 -When the final value has been entered the program will begin running automatically.
 -While the program is running it will periodically print information about the current day, time and shift of the simulation.
