@@ -71,7 +71,7 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 
 	//Emergency Leave the store
 	ca.emergencyLeaveChance = (math.Round((r.Float64()*1)*100) / 100)
-	if ca.emergencyLeaveChance > 0.95 {
+	if ca.emergencyLeaveChance > 0.99999 {
 		ca.emergencyLeave = true
 	}
 
@@ -135,6 +135,10 @@ func (ca *CustomerAgent) GetInitialised() bool {
 
 func (ca *CustomerAgent) GetAmicability() float64 {
 	return ca.amicability
+}
+
+func (ca *CustomerAgent) TimeToProcess() float64 {
+	return 1.2 - ((ca.competence ) / 2.5)
 }
 
 func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {

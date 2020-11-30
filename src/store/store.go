@@ -274,7 +274,7 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay i
 				s.CustomerQueues[checkoutIndex] = s.CustomerQueues[checkoutIndex][1:]
 			}
 			s.Checkouts[checkoutIndex].ProcessingCustomer = true
-			go s.Checkouts[checkoutIndex].ProcessCustomer(s.ItemTimeBounds, currentShift)
+			go s.Checkouts[checkoutIndex].ProcessCustomer(currentShift)
 		}
 	}
 }
