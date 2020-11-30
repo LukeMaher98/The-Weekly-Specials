@@ -52,5 +52,5 @@ func (cashier *CashierAgent) ManagerAbsent() {
 
 // GetAmicability : returns cashier amicability
 func (cashier *CashierAgent) GetAmicability() float64 {
-	return cashier.amicability * cashier.managerBoost
+	return cashier.amicability
 }
