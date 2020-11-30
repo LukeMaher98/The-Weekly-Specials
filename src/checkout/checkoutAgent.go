@@ -65,7 +65,7 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool {
 	return Manned
 }
 
-func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
+func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat, shift int) {
 
 	// Only process actual customers
 	if co.CurrentCustomer.GetInitialised() == true {
@@ -73,10 +73,13 @@ func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttribute
 			co.CurrentCustomerProgress += item.GetItemHandling()
 			co.TotalMoney += item.GetPrice()
 		}
-		
-		//Right now this is averaging out for me around 25 customers per hour which seems good to me?
-		// Carl multiply this value before casting to time.Duration by the [0.8-1.2] from Cashier thing
-		sleepTime := time.Duration(int(co.CurrentCustomerProgress))
+
+		sleepTime := time.Millisecond
+		if shift == 0 {
+			sleepTime = time.Duration(int(co.CurrentCustomerProgress * co.FirstShiftCashier.TimeToProcess()))
+		} else if shift == 1 {
+			sleepTime = time.Duration(int(co.CurrentCustomerProgress * co.SecondShiftCashier.TimeToProcess()))
+		}
 
 		time.Sleep(sleepTime * time.Millisecond)
 
