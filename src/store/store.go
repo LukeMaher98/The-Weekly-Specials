@@ -354,6 +354,15 @@ func (s *StoreAgent) removeQueueCustomer(queueIndex int, customerIndex int) {
 	}
 }
 
+func (s *StoreAgent) ResetDay() {
+	s.CustomersOnFloor = []customer.CustomerAgent{}
+	s.CustomersReadyToQueue = []customer.CustomerAgent{}
+	s.CustomerQueues = [][]customer.CustomerAgent{}
+	for _, checkout := range s.Checkouts {
+		checkout.ProcessingCustomer = false
+	}
+}
+
 func (s *StoreAgent) PrintResults() {
 	totalCustomersProcessed := 0
 	totalMonetaryIntake := 0.0

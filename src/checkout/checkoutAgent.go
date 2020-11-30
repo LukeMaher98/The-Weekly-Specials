@@ -69,24 +69,27 @@ func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttribute
 
 	// Only process actual customers
 	if co.CurrentCustomer.GetInitialised() == true {
-		for _, item := range co.CurrentCustomer.GetCustomerItems() {
-			co.CurrentCustomerProgress += item.GetItemHandling()
-			co.TotalMoney += item.GetPrice()
+		for co.ProcessingCustomer == true {
+			customerTotal := 0.0
+			for _, item := range co.CurrentCustomer.GetCustomerItems() {
+				co.CurrentCustomerProgress += item.GetItemHandling()
+				customerTotal += item.GetPrice()
+			}
+			co.TotalMoney += customerTotal
+
+			sleepTime := time.Millisecond
+			if shift == 0 {
+				sleepTime = time.Duration(int(co.CurrentCustomerProgress * co.FirstShiftCashier.TimeToProcess()))
+			} else if shift == 1 {
+				sleepTime = time.Duration(int(co.CurrentCustomerProgress * co.SecondShiftCashier.TimeToProcess()))
+			}
+
+			time.Sleep(sleepTime * time.Millisecond)
+
+			co.CustomersProcessed++
 		}
-
-		sleepTime := time.Millisecond
-		if shift == 0 {
-			sleepTime = time.Duration(int(co.CurrentCustomerProgress * co.FirstShiftCashier.TimeToProcess()))
-		} else if shift == 1 {
-			sleepTime = time.Duration(int(co.CurrentCustomerProgress * co.SecondShiftCashier.TimeToProcess()))
-		}
-
-		time.Sleep(sleepTime * time.Millisecond)
-
-		co.CustomersProcessed++
 	}
 
 	co.CurrentCustomer = customer.CustomerAgent{}
 	co.ProcessingCustomer = false
-
 }
