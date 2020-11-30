@@ -9,12 +9,12 @@ import (
 )
 
 type CustomerAgent struct {
-	items            	 []item.ItemAgent
-	impairmentFactor 	 float64
-	couponItem      	 float64
-	withChildren         bool
-	loyaltyCard    	     bool
-	amicability 	   	 float64
+	items            []item.ItemAgent
+	impairmentFactor float64
+	couponItem       float64
+	withChildren     bool
+	loyaltyCard      bool
+	amicability      float64
 	//customer age 		 int       not implemented yet but could later otherwise item age rating has no meaning
 	emergencyLeaveChance float64
 	emergencyLeave       bool
@@ -24,8 +24,8 @@ type CustomerAgent struct {
 	finishedShop         bool
 	inQueue              bool
 	FloorStaffNearby     floorStaff.FloorStaff
-	initialised			 bool
-	Occupied			 bool
+	initialised          bool
+	Occupied             bool
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -41,7 +41,6 @@ func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	ca.competence = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
 	ca.withChildren = (r.Intn(2) == 1)
 	ca.loyaltyCard = (r.Intn(2) == 1)
-
 
 	ca.trolleyLimit = r.Intn((UpperBound+1)-LowerBound) + LowerBound
 	//ca.age = (r.Intn(100-14) + 14) will be removed tomorrow if not implemented at checkout
@@ -92,8 +91,9 @@ func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	currentQueueLength := QueueLengths[0]
 
 	for i, s := range QueueLengths {
-		if s <= currentQueueLength {
+		if s < currentQueueLength {
 			selectedQueue = i
+			currentQueueLength = QueueLengths[i]
 		}
 	}
 
@@ -134,11 +134,11 @@ func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlin
 	var chanceItemAdded = 1.0
 
 	if ca.withChildren && isImpaired {
-		chanceItemAdded  -= math.Round((r.Float64()*0.8)*100) / 100
+		chanceItemAdded -= math.Round((r.Float64()*0.8)*100) / 100
 	} else if ca.withChildren || isImpaired {
-		chanceItemAdded  -= math.Round((r.Float64()*0.5)*100) / 100
+		chanceItemAdded -= math.Round((r.Float64()*0.5)*100) / 100
 	} else {
-		chanceItemAdded  -= math.Round((r.Float64()*0.3)*100) / 100
+		chanceItemAdded -= math.Round((r.Float64()*0.3)*100) / 100
 	}
 
 	if ca.Occupied {
@@ -146,7 +146,7 @@ func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlin
 			itemAddBoost = 1 + (ca.competence * ca.FloorStaffNearby.GetCompetence())
 		}
 	} else {
-			itemAddBoost = 1 + (ca.competence / 5)
+		itemAddBoost = 1 + (ca.competence / 5)
 	}
 
 	chanceItemAdded *= itemAddBoost
