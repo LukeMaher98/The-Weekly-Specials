@@ -9,11 +9,13 @@ import (
 type CheckoutAgent struct {
 	ProcessingCustomer      bool
 	CurrentCustomerProgress float64
-	TotalMoney              float64
 	FirstShiftCashier       cashier.CashierAgent
 	SecondShiftCashier      cashier.CashierAgent
 	CurrentCustomer         customer.CustomerAgent
 	CustomersProcessed      int
+	TotalMoney              float64
+	CustomerWaitTime        float64
+	TotalProductsProcessed  int
 	SelfCheckout            bool
 }
 
@@ -25,6 +27,8 @@ func CreateInitialisedCheckoutAgent(isSelfCheckout bool) CheckoutAgent {
 	co.ProcessingCustomer = false
 	co.CurrentCustomerProgress = 0
 	co.TotalMoney = 0
+	co.CustomerWaitTime = 0.0
+	co.TotalProductsProcessed = 0
 	co.FirstShiftCashier = cashier.CashierAgent{}
 	co.SecondShiftCashier = cashier.CashierAgent{}
 	co.SelfCheckout = isSelfCheckout
@@ -58,15 +62,19 @@ func (co *CheckoutAgent) ProcessCustomer(shift int) {
 	if co.CurrentCustomer.GetInitialised() == true {
 		for co.ProcessingCustomer == true {
 			customerTotal := 0.0
+			customerTrolleyTotal := 0
+
 			for _, item := range co.CurrentCustomer.GetCustomerItems() {
 				if co.CurrentCustomer.GetAge() < 18 && item.IsAgeRated() {
 					// Skips item
 				} else {
 					co.CurrentCustomerProgress += item.GetItemHandling()
 					customerTotal += item.GetPrice()
+					customerTrolleyTotal++
 				}
 			}
 			co.TotalMoney += customerTotal
+			co.TotalProductsProcessed += customerTrolleyTotal
 
 			sleepTime := time.Millisecond
 			if shift == 0 {
@@ -80,13 +88,11 @@ func (co *CheckoutAgent) ProcessCustomer(shift int) {
 			} else {
 				sleepTime += time.Duration(1.2-((co.FirstShiftCashier.GetAmicability()*co.CurrentCustomer.GetAmicability())/2.5)) / 60
 			}
-
 			time.Sleep(sleepTime * time.Millisecond)
-
+			co.CustomerWaitTime += float64(sleepTime)
 			co.CustomersProcessed++
 		}
 	}
-
 	co.CurrentCustomer = customer.CustomerAgent{}
 	co.ProcessingCustomer = false
 }
@@ -97,15 +103,19 @@ func (co *CheckoutAgent) ProcessSelf(shift int) {
 	if co.CurrentCustomer.GetInitialised() == true {
 		for co.ProcessingCustomer == true {
 			customerTotal := 0.0
+			customerTrolleyTotal := 0
+
 			for _, item := range co.CurrentCustomer.GetCustomerItems() {
 				if co.CurrentCustomer.GetAge() < 18 && item.IsAgeRated() {
 					// Skips item
 				} else {
 					co.CurrentCustomerProgress += item.GetItemHandling()
 					customerTotal += item.GetPrice()
+					customerTrolleyTotal++
 				}
 			}
 			co.TotalMoney += customerTotal
+			co.TotalProductsProcessed += customerTrolleyTotal
 
 			sleepTime := time.Millisecond
 			if shift == 0 {
@@ -121,6 +131,7 @@ func (co *CheckoutAgent) ProcessSelf(shift int) {
 			}
 
 			time.Sleep(sleepTime * time.Millisecond)
+			co.CustomerWaitTime += float64(sleepTime)
 
 			co.CustomersProcessed++
 		}

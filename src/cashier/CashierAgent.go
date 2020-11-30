@@ -30,11 +30,6 @@ func CreateInitialisedCashierAgent(amicLower, amicUpper, compLower, compUpper fl
 	return cashier
 }
 
-// PropagateTime : propogates time for the cashier
-func (cashier *CashierAgent) PropagateTime() {
-
-}
-
 // TimeToProcess : returns the time to process x items
 func (cashier *CashierAgent) TimeToProcess() float64 {
 	return 1.2 - ((cashier.competence * cashier.managerBoost) / 2.5)
