@@ -9,13 +9,14 @@ import (
 )
 
 type CustomerAgent struct {
-	items            []item.ItemAgent
-	impairmentFactor float64
-	couponItem       float64
-	withChildren     bool
-	loyaltyCard      bool
-	amicability      float64
-	//customer age 		 int       not implemented yet but could later otherwise item age rating has no meaning
+	items                []item.ItemAgent
+	impairmentFactor     float64
+	couponItem           float64
+	withChildren         bool
+	loyaltyCard          bool
+	amicability          float64
+	age                  int
+	cashPreference       bool
 	emergencyLeaveChance float64
 	emergencyLeave       bool
 	competence           float64
@@ -41,9 +42,10 @@ func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	ca.competence = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
 	ca.withChildren = (r.Intn(2) == 1)
 	ca.loyaltyCard = (r.Intn(2) == 1)
+	ca.cashPreference = (r.Intn(2) == 1)
 
 	ca.trolleyLimit = r.Intn((UpperBound+1)-LowerBound) + LowerBound
-	//ca.age = (r.Intn(100-14) + 14) will be removed tomorrow if not implemented at checkout
+	ca.age = (r.Intn(90-14) + 14)
 
 	//dynamic values
 	ca.emergencyLeaveChance = 0.0
@@ -109,6 +111,14 @@ func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	return selectedQueue
 }
 
+func (ca *CustomerAgent) GetAge() int {
+	return ca.age
+}
+
+func (ca *CustomerAgent) GetCashPreference() bool {
+	return ca.cashPreference
+}
+
 func (ca *CustomerAgent) IsFinishedShopping() bool {
 	return ca.finishedShop
 }
@@ -144,6 +154,12 @@ func (ca *CustomerAgent) addItemsToTrolley(ItemHandlingUpper float64, ItemHandli
 		var isImpaired = ((ca.impairmentFactor) > (math.Round(((r.Float64()*(0.5))+0.4)*100) / 100))
 		var itemAddBoost = 0.0
 		var chanceItemAdded = 1.0
+		var underAge = ca.age < 18
+		var abilityToAddAgeRestrictedItem = false
+
+		if !underAge {
+			abilityToAddAgeRestrictedItem = true
+		}
 
 		if ca.withChildren && isImpaired {
 			chanceItemAdded -= math.Round((r.Float64()*0.8)*100) / 100
@@ -163,9 +179,19 @@ func (ca *CustomerAgent) addItemsToTrolley(ItemHandlingUpper float64, ItemHandli
 
 		chanceItemAdded *= itemAddBoost
 
-		if chanceItemAdded > 0.3 {
+	if chanceItemAdded > 0.3 {
+		var newAddedItem = item.NewItem(ItemHandlingUpper, ItemHandlingLower)
+
+		if underAge && newAddedItem.IsAgeRated() {
+			abilityToAddAgeRestrictedItem = (math.Round((r.Float64()*1)*100) / 100) > 0.95
+		}
+
+		if !newAddedItem.IsAgeRated() {
+			ca.items = append(ca.items, newAddedItem)
 			ca.currentTrolleyCount++
-			ca.items = append(ca.items, item.NewItem(ItemHandlingUpper, ItemHandlingLower))
+		} else if abilityToAddAgeRestrictedItem {
+			ca.items = append(ca.items, newAddedItem)
+			ca.currentTrolleyCount++
 		}
 	}
 

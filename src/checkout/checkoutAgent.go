@@ -72,6 +72,7 @@ func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttribute
 		for co.ProcessingCustomer == true {
 			customerTotal := 0.0
 			for _, item := range co.CurrentCustomer.GetCustomerItems() {
+				//Age rated check goes here lenny : ) ?
 				co.CurrentCustomerProgress += item.GetItemHandling()
 				customerTotal += item.GetPrice()
 			}
