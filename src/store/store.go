@@ -117,17 +117,6 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
-	// for i := range s.CustomerQueues {
-	// 	if(len(s.CustomerQueues[i]) > 0){
-	// 		fmt.Println("Floor Customers:", len(s.CustomersOnFloor))
-	// 		fmt.Println("Lost Customers:", len(s.CustomersLost))
-	// 		fmt.Println("RTQ Customers:", len(s.CustomersReadyToQueue))
-	// 		for i := range s.CustomerQueues {
-	// 			fmt.Println("Queue:", i, len(s.CustomerQueues[i]))
-	// 		}
-	// 	}
-	// }
-
 	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
 	s.propagateStore(currentShift, currentDay, currentTime)
 	s.propagateCustomerQueues(currentShift, currentDay, currentTime)
@@ -291,18 +280,33 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay i
 }
 
 func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTime float64) {
+	
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	for customerIndex := range s.CustomersOnFloor {
 		s.CustomersOnFloor[customerIndex].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}
 
 	if currentShift == 0 {
-		for _, staff := range s.FloorStaffFirstShift {
-			staff.PropagateTime()
+		for i := range s.FloorStaffFirstShift {
+			if len(s.CustomersOnFloor) != 0 {
+				rand := r.Intn(len(s.CustomersOnFloor))
+				if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffFirstShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+					s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffFirstShift[i]
+					s.CustomersOnFloor[rand].Occupied = true
+				}
+			}
 		}
 		s.ManagerFirstShift.PropagateTime()
 	} else {
-		for _, staff := range s.FloorStaffSecondShift {
-			staff.PropagateTime()
+		for i := range s.FloorStaffSecondShift {
+			if len(s.CustomersOnFloor) != 0 {
+				rand := r.Intn(len(s.CustomersOnFloor))
+				if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffSecondShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+					s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffSecondShift[i]
+					s.CustomersOnFloor[rand].Occupied = true
+				}
+			}
 		}
 		s.ManagerSecondShift.PropagateTime()
 	}
@@ -354,7 +358,7 @@ func (s *StoreAgent) PrintResults() {
 	totalCustomersProcessed := 0
 	totalMonetaryIntake := 0.0
 	fmt.Println("Scenario Results:")
-	fmt.Println("------------------\n")
+	fmt.Println("------------------")
 	for index, checkout := range s.Checkouts {
 		fmt.Println("[Checkout ", index, "] Customers Processed: ", checkout.CustomersProcessed, " Monetary Intake: ", checkout.TotalMoney)
 		totalCustomersProcessed += checkout.CustomersProcessed
