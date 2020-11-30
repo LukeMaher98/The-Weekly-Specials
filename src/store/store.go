@@ -289,19 +289,23 @@ func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTim
 
 	if currentShift == 0 {
 		for i := range s.FloorStaffFirstShift {
-			rand := r.Intn(len(s.CustomersOnFloor))
-			if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffFirstShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
-				s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffFirstShift[i]
-				s.CustomersOnFloor[rand].Occupied = true
+			if len(s.CustomersOnFloor) != 0 {
+				rand := r.Intn(len(s.CustomersOnFloor))
+				if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffFirstShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+					s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffFirstShift[i]
+					s.CustomersOnFloor[rand].Occupied = true
+				}
 			}
 		}
 		s.ManagerFirstShift.PropagateTime()
 	} else {
 		for i := range s.FloorStaffSecondShift {
-			rand := r.Intn(len(s.CustomersOnFloor))
-			if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffSecondShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
-				s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffSecondShift[i]
-				s.CustomersOnFloor[rand].Occupied = true
+			if len(s.CustomersOnFloor) != 0 {
+				rand := r.Intn(len(s.CustomersOnFloor))
+				if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffSecondShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+					s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffSecondShift[i]
+					s.CustomersOnFloor[rand].Occupied = true
+				}
 			}
 		}
 		s.ManagerSecondShift.PropagateTime()

@@ -79,6 +79,7 @@ func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttribute
 		}
 		
 		//Right now this is averaging out for me around 25 customers per hour which seems good to me?
+		// Carl multiply this value before casting to time.Duration by the [0.8-1.2] from Cashier thing
 		sleepTime := time.Duration(int(co.CurrentCustomerProgress))
 
 		time.Sleep(sleepTime * time.Millisecond)

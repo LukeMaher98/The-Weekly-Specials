@@ -39,6 +39,10 @@ func (fs *FloorStaff) GetAmicability() float64 {
 	return fs.amicability * fs.managerBoost
 }
 
+func (fs *FloorStaff) GetCompetence() float64 {
+	return fs.competence * fs.managerBoost
+}
+
 // ManagerPresent : applies a boost to the cashier
 func (fs *FloorStaff) ManagerPresent(boost float64) {
 	fs.managerBoost = boost + 1.00
