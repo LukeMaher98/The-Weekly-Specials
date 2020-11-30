@@ -18,7 +18,7 @@ type CashierAgent struct {
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // CreateInitialisedCashierAgent : creates new cashier
-func CreateInitialisedCashierAgent(amicUpper, amicLower, compUpper, compLower float64) CashierAgent {
+func CreateInitialisedCashierAgent(amicLower, amicUpper, compLower, compUpper float64) CashierAgent {
 	cashier := CashierAgent{}
 
 	cashier.amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
@@ -37,9 +37,7 @@ func (cashier *CashierAgent) PropagateTime() {
 
 // TimeToProcess : returns the time to process x items
 func (cashier *CashierAgent) TimeToProcess() float64 {
-	var processed float64 = (cashier.competence * cashier.managerBoost) * 10
-
-	return processed
+	return 1.2 - ((cashier.amicability * cashier.managerBoost) / 2.5)
 }
 
 // ManagerPresent : applies a boost to the cashier

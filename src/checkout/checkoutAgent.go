@@ -53,13 +53,13 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool {
 	Manned := false
 
 	if currentShift == 0 {
-		if ((cashier.CashierAgent{}) == co.FirstShiftCashier) {
+		if (cashier.CashierAgent{}) == co.FirstShiftCashier {
 			Manned = false
 		} else {
 			Manned = true
 		}
 	} else {
-		if ((cashier.CashierAgent{}) == co.SecondShiftCashier) {
+		if (cashier.CashierAgent{}) == co.SecondShiftCashier {
 			Manned = false
 		} else {
 			Manned = true
@@ -71,17 +71,22 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool {
 
 func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
 
-	for _, item := range co.CurrentCustomer.GetCustomerItems() {
-		co.CurrentCustomerProgress += item.GetItemHandling()
-		co.TotalMoney += item.GetPrice()
+	// Only process actual customers
+	if co.CurrentCustomer.GetInitialised() == true {
+		for _, item := range co.CurrentCustomer.GetCustomerItems() {
+			co.CurrentCustomerProgress += item.GetItemHandling()
+			co.TotalMoney += item.GetPrice()
+		}
+		
+		//Right now this is averaging out for me around 25 customers per hour which seems good to me?
+		sleepTime := time.Duration(int(co.CurrentCustomerProgress))
+
+		time.Sleep(sleepTime * time.Millisecond)
+
+		co.CustomersProcessed++
 	}
 
-	// 1 clock = 60 seconds, dividing by 10 for a [0.5-6] second time to scan per item depending on the handling
-	co.CurrentCustomerProgress /= 10
-
-	// Wait until current time is current time + Round(currentCustomerProgress)
-
-	co.CustomersProcessed++
+	co.CurrentCustomer = customer.CustomerAgent{}
 	co.ProcessingCustomer = false
 
 }

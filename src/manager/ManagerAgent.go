@@ -22,7 +22,7 @@ type ManagerAgent struct {
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // CreateInitialisedFloorManagerAgent : creates new manager on floor
-func CreateInitialisedFloorManagerAgent(amicUpper, amicLower, compUpper, compLower float64, staff []floorStaff.FloorStaff, co []checkout.CheckoutAgent, shift int) ManagerAgent {
+func CreateInitialisedFloorManagerAgent(amicLower, amicUpper, compLower, compUpper float64, staff []floorStaff.FloorStaff, co []checkout.CheckoutAgent, shift int) ManagerAgent {
 	manager := ManagerAgent{}
 
 	manager.amicability = math.Round(((r.Float64()*(amicUpper-amicLower))+amicLower)*100) / 100
@@ -54,8 +54,10 @@ func (mngr *ManagerAgent) WorkTheFloor() {
 		mngr.currentCashier.ManagerAbsent()
 		mngr.currentCashier = nil
 
-		for _, staff := range mngr.floorStaff {
-			staff.ManagerPresent(mngr.competence)
+		for i := range mngr.floorStaff {
+			if mngr.floorStaff[i].GetAmicability()*mngr.amicability > ((r.Float64()*(0.3))+0.2)*100 {
+				mngr.floorStaff[i].ManagerPresent(mngr.competence)
+			}
 		}
 	}
 }
@@ -64,8 +66,8 @@ func (mngr *ManagerAgent) WorkTheFloor() {
 func (mngr *ManagerAgent) SuperviseCashier() {
 	if mngr.onFloor {
 		mngr.onFloor = false
-		for _, staff := range mngr.floorStaff {
-			staff.ManagerAbsent()
+		for i := range mngr.floorStaff {
+			mngr.floorStaff[i].ManagerAbsent()
 		}
 	}
 

@@ -97,12 +97,12 @@ func CreateInitialisedStoreAgent(
 	}
 
 	newStore.ManagerFirstShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-        floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
-        newStore.FloorStaffFirstShift, newStore.Checkouts, 1)
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+		newStore.FloorStaffFirstShift, newStore.Checkouts, 1)
 
-    newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
-        floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
-        newStore.FloorStaffFirstShift, newStore.Checkouts, 2)
+	newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
+		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
+		newStore.FloorStaffSecondShift, newStore.Checkouts, 2)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if arrivalRates.UpperBound != arrivalRates.LowerBound {
@@ -117,17 +117,6 @@ func CreateInitialisedStoreAgent(
 
 // PropagateTime : propagates time to agents in store
 func (s *StoreAgent) PropagateTime(currentShift int, currentDay int, currentTime float64, externalImpact float64) {
-	// for i := range s.CustomerQueues {
-	// 	if(len(s.CustomerQueues[i]) > 0){
-	// 		fmt.Println("Floor Customers:", len(s.CustomersOnFloor))
-	// 		fmt.Println("Lost Customers:", len(s.CustomersLost))
-	// 		fmt.Println("RTQ Customers:", len(s.CustomersReadyToQueue))
-	// 		for i := range s.CustomerQueues {
-	// 			fmt.Println("Queue:", i, len(s.CustomerQueues[i]))
-	// 		}
-	// 	}
-	// }
-
 	s.checkNewCustomers(getRateOfArrival(s.baseArrivalRate, currentDay, currentTime, externalImpact))
 	s.propagateStore(currentShift, currentDay, currentTime)
 	s.propagateCustomerQueues(currentShift, currentDay, currentTime)
@@ -189,12 +178,12 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 				Time:     currentTime,
 				Reason:   "Emergency",
 			})
-			removeCustomer(s.CustomersOnFloor, customerIndex)
+			s.removeFloorCustomer(customerIndex)
 			removedCount++
 			continue
 		} else if s.CustomersOnFloor[customerIndex].IsFinishedShopping() {
 			s.CustomersReadyToQueue = append(s.CustomersReadyToQueue, s.CustomersOnFloor[customerIndex])
-			removeCustomer(s.CustomersOnFloor, customerIndex)
+			s.removeFloorCustomer(customerIndex)
 			removedCount++
 		}
 	}
@@ -234,7 +223,7 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 				Time:     currentTime,
 				Reason:   "Emergency",
 			})
-			removeCustomer(s.CustomersReadyToQueue, customerIndex)
+			s.removeReadyCustomer(customerIndex)
 			continue
 		} else {
 			queueIndex := customer.SelectQueue(queueLengths)
@@ -248,7 +237,7 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 					Reason:   "Queues too long",
 				})
 			}
-			removeCustomer(s.CustomersReadyToQueue, customerIndex)
+			s.removeReadyCustomer(customerIndex)
 			removedCustomers++
 		}
 	}
@@ -291,18 +280,29 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay i
 }
 
 func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTime float64) {
+	
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	for customerIndex := range s.CustomersOnFloor {
 		s.CustomersOnFloor[customerIndex].PropagateTime(s.ItemTimeBounds.UpperBound, s.ItemTimeBounds.LowerBound)
 	}
 
 	if currentShift == 0 {
-		for _, staff := range s.FloorStaffFirstShift {
-			staff.PropagateTime()
+		for i := range s.FloorStaffFirstShift {
+			rand := r.Intn(len(s.CustomersOnFloor))
+			if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffFirstShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+				s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffFirstShift[i]
+				s.CustomersOnFloor[rand].Occupied = true
+			}
 		}
 		s.ManagerFirstShift.PropagateTime()
 	} else {
-		for _, staff := range s.FloorStaffSecondShift {
-			staff.PropagateTime()
+		for i := range s.FloorStaffSecondShift {
+			rand := r.Intn(len(s.CustomersOnFloor))
+			if s.CustomersOnFloor[rand].GetAmicability()*s.FloorStaffSecondShift[i].GetAmicability() > ((r.Float64()*(0.3))+0.2)*100 {
+				s.CustomersOnFloor[rand].FloorStaffNearby = s.FloorStaffSecondShift[i]
+				s.CustomersOnFloor[rand].Occupied = true
+			}
 		}
 		s.ManagerSecondShift.PropagateTime()
 	}
@@ -326,11 +326,19 @@ func (s *StoreAgent) getQueueLengths() []int {
 	return queueLengths
 }
 
-func removeCustomer(array []customer.CustomerAgent, customerIndex int) {
-	if customerIndex == len(array) {
-		array = append(array[:], array[:customerIndex]...)
+func (s *StoreAgent) removeFloorCustomer(customerIndex int) {
+	if customerIndex == len(s.CustomersOnFloor) {
+		s.CustomersOnFloor = append(s.CustomersOnFloor[:], s.CustomersOnFloor[:customerIndex]...)
 	} else {
-		array = append(array[:customerIndex], array[customerIndex+1:]...)
+		s.CustomersOnFloor = append(s.CustomersOnFloor[:customerIndex], s.CustomersOnFloor[customerIndex+1:]...)
+	}
+}
+
+func (s *StoreAgent) removeReadyCustomer(customerIndex int) {
+	if customerIndex == len(s.CustomersReadyToQueue) {
+		s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:], s.CustomersReadyToQueue[:customerIndex]...)
+	} else {
+		s.CustomersReadyToQueue = append(s.CustomersReadyToQueue[:customerIndex], s.CustomersReadyToQueue[customerIndex+1:]...)
 	}
 }
 

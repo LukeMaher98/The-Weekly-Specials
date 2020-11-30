@@ -24,13 +24,17 @@ type CustomerAgent struct {
 	currentTrolleyCount  int
 	finishedShop         bool
 	inQueue              bool
-	floorStaffNearby     floorStaff.FloorStaff
+	FloorStaffNearby     floorStaff.FloorStaff
+	initialised			 bool
+	Occupied			 bool
 }
 
 func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	ca := CustomerAgent{}
 
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	ca.initialised = true
 
 	//static values
 	ca.impairmentFactor = math.Round(((r.Float64()*(0.5))+0.25)*100) / 100
@@ -81,6 +85,9 @@ func (ca *CustomerAgent) PropagateTime(ItemHandlingUpper float64, ItemHandlingLo
 		}
 	}
 
+	// Reset to false after each iteration, floor staff only helps for 1 minute
+	ca.Occupied = false
+
 }
 
 func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
@@ -114,6 +121,14 @@ func (ca *CustomerAgent) EmergencyDeparture() bool {
 
 func (ca *CustomerAgent) GetCustomerItems() []item.ItemAgent {
 	return ca.items
+}
+
+func (ca *CustomerAgent) GetInitialised() bool {
+	return ca.initialised
+}
+
+func (ca *CustomerAgent) GetAmicability() float64 {
+	return ca.baseAmicability
 }
 
 func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {
