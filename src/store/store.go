@@ -231,7 +231,9 @@ func (s *StoreAgent) propagateCustomerQueues(currentShift int, currentDay int, c
 			continue
 		} else {
 			queueIndex := customer.SelectQueue(queueLengths)
-			if len(s.CustomerQueues[queueIndex]) < 6 {
+			if len(s.CustomerQueues) == 1 {
+				s.CustomerQueues[0] = append(s.CustomerQueues[0], customer)
+			} else if len(s.CustomerQueues[queueIndex]) < 6 {
 				s.CustomerQueues[queueIndex] = append(s.CustomerQueues[queueIndex], customer)
 			} else {
 				s.CustomersLost = append(s.CustomersLost, constants.CustomerLost{
@@ -380,7 +382,12 @@ func (s *StoreAgent) PrintResults() {
 	fmt.Println("\nScenario Results:")
 	fmt.Println("------------------")
 	for index, checkout := range s.Checkouts {
-		fmt.Printf("[Checkout %d ] \tCustomers Processed: %d \tMonetary Intake: €%.2f \tAverage Customer Wait Time: %.2f \tAverage Products Per Trolley: %.2f \t Average Monetary Intake Per Customer: €%.2f\n", index, checkout.CustomersProcessed, checkout.TotalMoney, checkout.CustomerWaitTime/float64(checkout.CustomersProcessed), float64(checkout.TotalProductsProcessed)/float64(checkout.CustomersProcessed), checkout.TotalMoney/float64(checkout.CustomersProcessed))
+		if checkout.SelfCheckout {
+			fmt.Printf("[Self-Checkout %d ] \tCustomers Processed: %d \tMonetary Intake: €%.2f \tAverage Customer Wait Time: %.2f \tAverage Products Per Trolley: %.2f \t Average Monetary Intake Per Customer: €%.2f\n", index, checkout.CustomersProcessed, checkout.TotalMoney, checkout.CustomerWaitTime/float64(checkout.CustomersProcessed), float64(checkout.TotalProductsProcessed)/float64(checkout.CustomersProcessed), checkout.TotalMoney/float64(checkout.CustomersProcessed))
+		} else {
+			fmt.Printf("[Checkout %d ] \t\tCustomers Processed: %d \tMonetary Intake: €%.2f \tAverage Customer Wait Time: %.2f \tAverage Products Per Trolley: %.2f \t Average Monetary Intake Per Customer: €%.2f\n", index, checkout.CustomersProcessed, checkout.TotalMoney, checkout.CustomerWaitTime/float64(checkout.CustomersProcessed), float64(checkout.TotalProductsProcessed)/float64(checkout.CustomersProcessed), checkout.TotalMoney/float64(checkout.CustomersProcessed))
+
+		}
 		totalCustomersProcessed += checkout.CustomersProcessed
 		totalMonetaryIntake += checkout.TotalMoney
 		totalCustomerWaitTime += checkout.CustomerWaitTime

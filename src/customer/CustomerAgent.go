@@ -27,6 +27,7 @@ type CustomerAgent struct {
 	FloorStaffNearby     floorStaff.FloorStaff
 	initialised          bool
 	Occupied             bool
+	lowerBound           int
 }
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -43,6 +44,7 @@ func NewCustomer(UpperBound int, LowerBound int) CustomerAgent {
 	ca.withChildren = (r.Intn(2) == 1)
 	ca.loyaltyCard = (r.Intn(2) == 1)
 	ca.cashPreference = (r.Intn(2) == 1)
+	ca.lowerBound = LowerBound
 
 	ca.trolleyLimit = r.Intn((UpperBound+1)-LowerBound) + LowerBound
 	ca.age = (r.Intn(90-14) + 14)
@@ -94,7 +96,7 @@ func (ca *CustomerAgent) SelectQueue(QueueLengths []int) int {
 	queueLengths := QueueLengths
 	adjVal := 0
 
-	if ca.trolleyLimit > 25 {
+	if ca.trolleyLimit > 25 && ca.lowerBound < 25 {
 		queueLengths = QueueLengths[1:]
 		adjVal = 1
 	}
