@@ -74,19 +74,21 @@ func (mngr *ManagerAgent) SuperviseCashier() {
 	randomIndex := r.Intn(len(mngr.cashiers))
 	pick := mngr.cashiers[randomIndex]
 	mngr.currentCashier = &pick
-	mngr.currentCashier.ManagerPresent(mngr.amicability)
+	if mngr.currentCashier.GetAmicability()*mngr.amicability > ((r.Float64()*(0.3))+0.2)*100 {
+		mngr.currentCashier.ManagerPresent(mngr.competence)
+	}
 }
 
 func getCashiers(co []checkout.CheckoutAgent, shift int) []cashier.CashierAgent {
 	var cash []cashier.CashierAgent
 
-	if shift == 1 {
+	if shift == 0 {
 		for _, c := range co {
 			if c.IsManned(shift) {
 				cash = append(cash, c.FirstShiftCashier)
 			}
 		}
-	} else if shift == 2 {
+	} else if shift == 1 {
 		for _, c := range co {
 			if c.IsManned(shift) {
 				cash = append(cash, c.SecondShiftCashier)

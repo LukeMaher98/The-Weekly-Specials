@@ -205,7 +205,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 			}
 		} else if defineEmployees == true {
 			if newScenario.floorStaffAttributeBounds.AmicabilityLowerBound < 0.0 || newScenario.floorStaffAttributeBounds.AmicabilityLowerBound > 1.0 {
-				fsAmicabilityLowerBoundTemp := 0.0
+				fsAmicabilityLowerBoundTemp := -1.0
 				fmt.Print("Floor Staff Amicability Lower Bound [0.0-1.0]> ")
 				fmt.Scanln(&fsAmicabilityLowerBoundTemp)
 				if fsAmicabilityLowerBoundTemp >= 0.0 && fsAmicabilityLowerBoundTemp <= 1.0 {
@@ -213,14 +213,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 				}
 			} else if newScenario.floorStaffAttributeBounds.AmicabilityUpperBound < newScenario.floorStaffAttributeBounds.AmicabilityLowerBound ||
 				newScenario.floorStaffAttributeBounds.AmicabilityUpperBound > 1.0 {
-				fsAmicabilityUpperBoundTemp := 0.0
+				fsAmicabilityUpperBoundTemp := -1.0
 				fmt.Printf("Floor Staff Amicability Upper Bound [%v-1.0]> ", newScenario.floorStaffAttributeBounds.AmicabilityLowerBound)
 				fmt.Scanln(&fsAmicabilityUpperBoundTemp)
 				if fsAmicabilityUpperBoundTemp >= newScenario.floorStaffAttributeBounds.AmicabilityLowerBound && fsAmicabilityUpperBoundTemp <= 1.0 {
 					newScenario.floorStaffAttributeBounds.AmicabilityUpperBound = fsAmicabilityUpperBoundTemp
 				}
 			} else if newScenario.floorStaffAttributeBounds.CompetanceLowerBound < 0.0 || newScenario.floorStaffAttributeBounds.CompetanceLowerBound > 1.0 {
-				fsCompetanceLowerBoundTemp := 0.0
+				fsCompetanceLowerBoundTemp := -1.0
 				fmt.Print("Floor Staff Competance Lower Bound [0.0-1.0]> ")
 				fmt.Scanln(&fsCompetanceLowerBoundTemp)
 				if fsCompetanceLowerBoundTemp >= 0.0 && fsCompetanceLowerBoundTemp <= 1.0 {
@@ -228,14 +228,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 				}
 			} else if newScenario.floorStaffAttributeBounds.CompetanceUpperBound < newScenario.floorStaffAttributeBounds.CompetanceLowerBound ||
 				newScenario.floorStaffAttributeBounds.CompetanceUpperBound > 1.0 {
-				fsCompetanceUpperBoundTemp := 0.0
+				fsCompetanceUpperBoundTemp := -1.0
 				fmt.Printf("Floor Staff Competance Upper Bound [%v-1.0]> ", newScenario.floorStaffAttributeBounds.CompetanceLowerBound)
 				fmt.Scanln(&fsCompetanceUpperBoundTemp)
 				if fsCompetanceUpperBoundTemp >= newScenario.floorStaffAttributeBounds.CompetanceLowerBound && fsCompetanceUpperBoundTemp <= 1.0 {
 					newScenario.floorStaffAttributeBounds.CompetanceUpperBound = fsCompetanceUpperBoundTemp
 				}
 			} else if newScenario.cashierAttributeBounds.AmicabilityLowerBound < 0.0 || newScenario.cashierAttributeBounds.AmicabilityLowerBound > 1.0 {
-				cAmicabilityLowerBoundTemp := 0.0
+				cAmicabilityLowerBoundTemp := -1.0
 				fmt.Print("Cashier Amicability Lower Bound [0.0-1.0]> ")
 				fmt.Scanln(&cAmicabilityLowerBoundTemp)
 				if cAmicabilityLowerBoundTemp >= 0.0 && cAmicabilityLowerBoundTemp <= 1.0 {
@@ -243,14 +243,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 				}
 			} else if newScenario.cashierAttributeBounds.AmicabilityUpperBound < newScenario.cashierAttributeBounds.AmicabilityLowerBound ||
 				newScenario.cashierAttributeBounds.AmicabilityUpperBound > 1.0 {
-				cAmicabilityUpperBoundTemp := 0.0
+				cAmicabilityUpperBoundTemp := -1.0
 				fmt.Printf("Cashier Amicability Upper Bound [%v-1.0]> ", newScenario.cashierAttributeBounds.AmicabilityLowerBound)
 				fmt.Scanln(&cAmicabilityUpperBoundTemp)
 				if cAmicabilityUpperBoundTemp >= newScenario.cashierAttributeBounds.AmicabilityLowerBound && cAmicabilityUpperBoundTemp <= 1.0 {
 					newScenario.cashierAttributeBounds.AmicabilityUpperBound = cAmicabilityUpperBoundTemp
 				}
 			} else if newScenario.cashierAttributeBounds.CompetanceLowerBound < 0.0 || newScenario.cashierAttributeBounds.CompetanceLowerBound > 1.0 {
-				cCompetanceLowerBoundTemp := 0.0
+				cCompetanceLowerBoundTemp := -1.0
 				fmt.Print("Cashier Competance Lower Bound [0.0-1.0]> ")
 				fmt.Scanln(&cCompetanceLowerBoundTemp)
 				if cCompetanceLowerBoundTemp >= 0.0 && cCompetanceLowerBoundTemp <= 1.0 {
@@ -258,14 +258,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 				}
 			} else if newScenario.cashierAttributeBounds.CompetanceUpperBound < newScenario.cashierAttributeBounds.CompetanceLowerBound ||
 				newScenario.cashierAttributeBounds.CompetanceUpperBound > 1.0 {
-				cCompetanceUpperBoundTemp := 0.0
+				cCompetanceUpperBoundTemp := -1.0
 				fmt.Printf("Cashier Competance Upper Bound [%v-1.0]> ", newScenario.cashierAttributeBounds.CompetanceLowerBound)
 				fmt.Scanln(&cCompetanceUpperBoundTemp)
 				if cCompetanceUpperBoundTemp >= newScenario.cashierAttributeBounds.CompetanceLowerBound && cCompetanceUpperBoundTemp <= 1.0 {
 					newScenario.cashierAttributeBounds.CompetanceUpperBound = cCompetanceUpperBoundTemp
 				}
 			} else if newScenario.floorManagerAttributeBounds.AmicabilityLowerBound < 0.0 || newScenario.floorManagerAttributeBounds.AmicabilityLowerBound > 1.0 {
-				fmAmicabilityLowerBoundTemp := 0.0
+				fmAmicabilityLowerBoundTemp := -1.0
 				fmt.Print("Floor Manager Amicability Lower Bound [0.0-1.0]> ")
 				fmt.Scanln(&fmAmicabilityLowerBoundTemp)
 				if fmAmicabilityLowerBoundTemp >= 0.0 && fmAmicabilityLowerBoundTemp <= 1.0 {
@@ -273,14 +273,14 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 				}
 			} else if newScenario.floorManagerAttributeBounds.AmicabilityUpperBound < newScenario.floorManagerAttributeBounds.AmicabilityLowerBound ||
 				newScenario.floorManagerAttributeBounds.AmicabilityUpperBound > 1.0 {
-				fmAmicabilityUpperBoundTemp := 0.0
+				fmAmicabilityUpperBoundTemp := -1.0
 				fmt.Printf("Floor Manager Amicability Upper Bound [%v-1.0]> ", newScenario.floorManagerAttributeBounds.AmicabilityLowerBound)
 				fmt.Scanln(&fmAmicabilityUpperBoundTemp)
 				if fmAmicabilityUpperBoundTemp >= newScenario.floorManagerAttributeBounds.AmicabilityLowerBound && fmAmicabilityUpperBoundTemp <= 1.0 {
 					newScenario.floorManagerAttributeBounds.AmicabilityUpperBound = fmAmicabilityUpperBoundTemp
 				}
 			} else if newScenario.floorManagerAttributeBounds.CompetanceLowerBound < 0.0 || newScenario.floorManagerAttributeBounds.CompetanceLowerBound > 1.0 {
-				fmCompetanceLowerBoundTemp := 0.0
+				fmCompetanceLowerBoundTemp := -1.0
 				fmt.Print("Floor Manager Competance Lower Bound [0.0-1.0]> ")
 				fmt.Scanln(&fmCompetanceLowerBoundTemp)
 				if fmCompetanceLowerBoundTemp >= 0.0 && fmCompetanceLowerBoundTemp <= 1.0 {
@@ -288,7 +288,7 @@ func CreateInitialisedScenarioAgent() ScenarioAgent {
 				}
 			} else if newScenario.floorManagerAttributeBounds.CompetanceUpperBound < newScenario.floorManagerAttributeBounds.CompetanceLowerBound ||
 				newScenario.floorManagerAttributeBounds.CompetanceUpperBound > 1.0 {
-				fmCompetanceUpperBoundTemp := 0.0
+				fmCompetanceUpperBoundTemp := -1.0
 				fmt.Printf("Floor Manager Competence Upper Bound [%v-1.0]> ", newScenario.floorManagerAttributeBounds.CompetanceLowerBound)
 				fmt.Scanln(&fmCompetanceUpperBoundTemp)
 				if fmCompetanceUpperBoundTemp >= newScenario.floorManagerAttributeBounds.CompetanceLowerBound && fmCompetanceUpperBoundTemp <= 1.0 {

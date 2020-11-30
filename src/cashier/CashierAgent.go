@@ -37,7 +37,7 @@ func (cashier *CashierAgent) PropagateTime() {
 
 // TimeToProcess : returns the time to process x items
 func (cashier *CashierAgent) TimeToProcess() float64 {
-	return 1.2 - ((cashier.amicability * cashier.managerBoost) / 2.5)
+	return 1.2 - ((cashier.competence * cashier.managerBoost) / 2.5)
 }
 
 // ManagerPresent : applies a boost to the cashier
@@ -48,4 +48,9 @@ func (cashier *CashierAgent) ManagerPresent(boost float64) {
 // ManagerAbsent : reverts the boost to the cashier
 func (cashier *CashierAgent) ManagerAbsent() {
 	cashier.managerBoost = 1
+}
+
+// GetAmicability : returns cashier amicability
+func (cashier *CashierAgent) GetAmicability() float64 {
+	return cashier.amicability
 }

@@ -98,11 +98,11 @@ func CreateInitialisedStoreAgent(
 
 	newStore.ManagerFirstShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
 		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
-		newStore.FloorStaffFirstShift, newStore.Checkouts, 1)
+		newStore.FloorStaffFirstShift, newStore.Checkouts, 0)
 
 	newStore.ManagerSecondShift = manager.CreateInitialisedFloorManagerAgent(floorStaffAttributeBounds.AmicabilityLowerBound,
 		floorStaffAttributeBounds.AmicabilityUpperBound, floorStaffAttributeBounds.CompetanceLowerBound, floorStaffAttributeBounds.CompetanceUpperBound,
-		newStore.FloorStaffSecondShift, newStore.Checkouts, 2)
+		newStore.FloorStaffSecondShift, newStore.Checkouts, 1)
 
 	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if arrivalRates.UpperBound != arrivalRates.LowerBound {
@@ -274,13 +274,13 @@ func (s *StoreAgent) propagateConcurrentCheckouts(currentShift int, currentDay i
 				s.CustomerQueues[checkoutIndex] = s.CustomerQueues[checkoutIndex][1:]
 			}
 			s.Checkouts[checkoutIndex].ProcessingCustomer = true
-			go s.Checkouts[checkoutIndex].ProcessCustomer(s.ItemTimeBounds)
+			go s.Checkouts[checkoutIndex].ProcessCustomer(s.ItemTimeBounds, currentShift)
 		}
 	}
 }
 
 func (s *StoreAgent) propagateStore(currentShift int, currentDay int, currentTime float64) {
-	
+
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	for customerIndex := range s.CustomersOnFloor {
