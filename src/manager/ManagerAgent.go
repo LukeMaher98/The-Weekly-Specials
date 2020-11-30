@@ -55,7 +55,7 @@ func (mngr *ManagerAgent) WorkTheFloor() {
 		mngr.currentCashier = nil
 
 		for i := range mngr.floorStaff {
-			if mngr.floorStaff[i].Amicability*mngr.amicability > ((r.Float64()*(0.3))+0.2)*100 {
+			if mngr.floorStaff[i].GetAmicability()*mngr.amicability > ((r.Float64()*(0.3))+0.2)*100 {
 				mngr.floorStaff[i].ManagerPresent(mngr.competence)
 			}
 		}

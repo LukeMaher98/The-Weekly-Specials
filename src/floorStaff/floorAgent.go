@@ -9,16 +9,15 @@ import (
 // Floor Staff agent struct
 type FloorStaff struct {
 	managerBoost      float64
-	Amicability       float64
-	Competance        float64
-	OccupyingCustomer bool
-	ManagerOccupied   bool
+	amicability       float64
+	competence        float64
+	managerOccupied   bool
 }
+
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // Floor Staff agent constructor
 func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) FloorStaff {
-
-	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Create staff agent
 	staff := FloorStaff{}
@@ -27,33 +26,31 @@ func CreateInitialisedFloorStaffAgent(AmicLB, AmicUB, CompLB, CompUB float64) Fl
 	staff.managerBoost = 1
 
 	// Randomly initialised variables based on boundings
-	staff.Amicability = math.Round(((r.Float64()*(AmicUB-AmicLB))+AmicLB)*100) / 100
-	staff.Competance = math.Round(((r.Float64()*(CompUB-CompLB))+CompLB)*100) / 100
-
-	// Initialised False
-	staff.OccupyingCustomer = false
-	staff.ManagerOccupied = false
+	staff.amicability = math.Round(((r.Float64()*(AmicUB-AmicLB))+AmicLB)*100) / 100
+	staff.competence = math.Round(((r.Float64()*(CompUB-CompLB))+CompLB)*100) / 100
+	
+	staff.managerOccupied = false
 
 	// Return staff object
 	return staff
 }
 
-func (fs *FloorStaff) PropagateTime() {
+func (fs *FloorStaff) GetAmicability() float64 {
+	return fs.amicability * fs.managerBoost
+}
 
-	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	if r.Float64() < (fs.Amicability * fs.managerBoost) {
-		fs.OccupyingCustomer = !fs.OccupyingCustomer
-	}
-
+func (fs *FloorStaff) GetCompetence() float64 {
+	return fs.competence * fs.managerBoost
 }
 
 // ManagerPresent : applies a boost to the cashier
 func (fs *FloorStaff) ManagerPresent(boost float64) {
 	fs.managerBoost = boost + 1.00
+	fs.managerOccupied = true
 }
 
 // ManagerAbsent : reverts the boost to the cashier
 func (fs *FloorStaff) ManagerAbsent() {
 	fs.managerBoost = 1
+	fs.managerOccupied = false
 }

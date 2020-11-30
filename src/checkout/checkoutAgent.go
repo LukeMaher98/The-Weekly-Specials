@@ -45,10 +45,6 @@ func CreateInitialisedCheckoutAgent() CheckoutAgent {
 	return co
 }
 
-func (co *CheckoutAgent) PropagateTime() {
-
-}
-
 func (co *CheckoutAgent) IsManned(currentShift int) bool {
 	Manned := false
 
@@ -71,16 +67,23 @@ func (co *CheckoutAgent) IsManned(currentShift int) bool {
 
 func (co *CheckoutAgent) ProcessCustomer(ItemTimeBounds constants.StoreAttributeBoundsFloat) {
 
-	for _, item := range co.CurrentCustomer.GetCustomerItems() {
-		co.CurrentCustomerProgress += item.GetItemHandling()
-		co.TotalMoney += item.GetPrice()
+	// Only process actual customers
+	if co.CurrentCustomer.GetInitialised() == true {
+		for _, item := range co.CurrentCustomer.GetCustomerItems() {
+			co.CurrentCustomerProgress += item.GetItemHandling()
+			co.TotalMoney += item.GetPrice()
+		}
+		
+		//Right now this is averaging out for me around 25 customers per hour which seems good to me?
+		// Carl multiply this value before casting to time.Duration by the [0.8-1.2] from Cashier thing
+		sleepTime := time.Duration(int(co.CurrentCustomerProgress))
+
+		time.Sleep(sleepTime * time.Millisecond)
+
+		co.CustomersProcessed++
 	}
 
-	// 1 clock = 60 seconds, dividing by 10 for a [0.5-6] second time to scan per item depending on the handling
-	co.CurrentCustomerProgress /= 10
-
-	// Wait until current time is current time + Round(currentCustomerProgress)
-	co.CustomersProcessed++
+	co.CurrentCustomer = customer.CustomerAgent{}
 	co.ProcessingCustomer = false
 
 }
