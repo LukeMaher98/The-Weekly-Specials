@@ -342,6 +342,7 @@ func (s *ScenarioAgent) PropagateTime(elapsed float64) float64 {
 			}
 		}
 	} else {
+		s.Store.ResetDay()
 		elapsedTime += closedTime - 1
 	}
 
