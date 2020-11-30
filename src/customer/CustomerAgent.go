@@ -176,10 +176,10 @@ func (ca *CustomerAgent) addItemToTrolley(ItemHandlingUpper float64, ItemHandlin
 
 		if !newAddedItem.IsAgeRated() {
 			ca.items = append(ca.items, newAddedItem)
+			ca.currentTrolleyCount++
 		} else if abilityToAddAgeRestrictedItem {
 			ca.items = append(ca.items, newAddedItem)
+			ca.currentTrolleyCount++
 		}
-
-		ca.currentTrolleyCount++
 	}
 }
