@@ -72,7 +72,7 @@ func CreateInitialisedStoreAgent(
 	newStore.ItemTimeBounds = itemTimes
 
 	for i := 0; i < checkoutCount; i++ {
-		if checkoutCount < 1 && i == 0 {
+		if checkoutCount > 1 && i == 0 {
 			newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent(true))
 		} else {
 			newStore.Checkouts = append(newStore.Checkouts, checkout.CreateInitialisedCheckoutAgent(false))
