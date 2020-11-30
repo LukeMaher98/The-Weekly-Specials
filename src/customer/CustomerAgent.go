@@ -147,6 +147,10 @@ func (ca *CustomerAgent) GetAmicability() float64 {
 	return ca.amicability
 }
 
+func (ca *CustomerAgent) TimeToProcess() float64 {
+	return 1.2 - ((ca.competence ) / 2.5)
+}
+
 func (ca *CustomerAgent) addItemsToTrolley(ItemHandlingUpper float64, ItemHandlingLower float64) {
 	var itemsAddedToTrolley = r.Intn(5) + 1
 
