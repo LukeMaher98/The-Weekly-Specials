@@ -179,20 +179,20 @@ func (ca *CustomerAgent) addItemsToTrolley(ItemHandlingUpper float64, ItemHandli
 
 		chanceItemAdded *= itemAddBoost
 
-	if chanceItemAdded > 0.3 {
-		var newAddedItem = item.NewItem(ItemHandlingUpper, ItemHandlingLower)
+		if chanceItemAdded > 0.3 {
+			var newAddedItem = item.NewItem(ItemHandlingUpper, ItemHandlingLower)
 
-		if underAge && newAddedItem.IsAgeRated() {
-			abilityToAddAgeRestrictedItem = (math.Round((r.Float64()*1)*100) / 100) > 0.95
-		}
+			if underAge && newAddedItem.IsAgeRated() {
+				abilityToAddAgeRestrictedItem = (math.Round((r.Float64()*1)*100) / 100) > 0.95
+			}
 
-		if !newAddedItem.IsAgeRated() {
-			ca.items = append(ca.items, newAddedItem)
-			ca.currentTrolleyCount++
-		} else if abilityToAddAgeRestrictedItem {
-			ca.items = append(ca.items, newAddedItem)
-			ca.currentTrolleyCount++
+			if !newAddedItem.IsAgeRated() {
+				ca.items = append(ca.items, newAddedItem)
+				ca.currentTrolleyCount++
+			} else if abilityToAddAgeRestrictedItem {
+				ca.items = append(ca.items, newAddedItem)
+				ca.currentTrolleyCount++
+			}
 		}
 	}
-
 }
