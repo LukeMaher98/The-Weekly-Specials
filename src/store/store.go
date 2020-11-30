@@ -374,14 +374,22 @@ func (s *StoreAgent) ResetDay() {
 func (s *StoreAgent) PrintResults() {
 	totalCustomersProcessed := 0
 	totalMonetaryIntake := 0.0
-	fmt.Println("Scenario Results:")
+	totalCustomerWaitTime := 0.0
+	totalProductsProcessed := 0
+
+	fmt.Println("\nScenario Results:")
 	fmt.Println("------------------")
 	for index, checkout := range s.Checkouts {
-		fmt.Println("[Checkout ", index, "] Customers Processed: ", checkout.CustomersProcessed, " Monetary Intake: ", checkout.TotalMoney)
+		fmt.Printf("[Checkout %d ] \tCustomers Processed: %d \tMonetary Intake: €%.2f \tAverage Customer Wait Time: %.2f \tAverage Products Per Trolley: %.2f \t Average Monetary Intake Per Customer: €%.2f\n", index, checkout.CustomersProcessed, checkout.TotalMoney, checkout.CustomerWaitTime/float64(checkout.CustomersProcessed), float64(checkout.TotalProductsProcessed)/float64(checkout.CustomersProcessed), checkout.TotalMoney/float64(checkout.CustomersProcessed))
 		totalCustomersProcessed += checkout.CustomersProcessed
 		totalMonetaryIntake += checkout.TotalMoney
+		totalCustomerWaitTime += checkout.CustomerWaitTime
+		totalProductsProcessed += checkout.TotalProductsProcessed
 	}
-	fmt.Println("\n[Total] Customers Processed: ", totalCustomersProcessed, " Monetary Intake: ", totalMonetaryIntake)
+	fmt.Printf("\n[Total]\nCustomers Processed: %d\nMonetary Intake: €%.2f\nTotal Products Processed: %d\nTotal Customer Wait Time: %.2f\n", totalCustomersProcessed, totalMonetaryIntake, totalProductsProcessed, totalCustomerWaitTime)
+
+	var noOfCheckouts = float64(len(s.Checkouts))
+	fmt.Printf("\n[Average]\nAverage Checkout Customers Processed: %.2f\nAverage Checkout Monetary Intake: €%.2f\nAverage Products Per Customer: %.2f\nAverage Monetary Intake Per Customer: €%.2f\nAverage Customer Wait Time: %.2f\n", float64(totalCustomersProcessed)/noOfCheckouts, float64(totalMonetaryIntake)/noOfCheckouts, float64(totalProductsProcessed)/float64(totalCustomersProcessed), totalMonetaryIntake/float64(totalCustomersProcessed), totalCustomerWaitTime/float64(totalCustomersProcessed))
 	emergencyLostCustomers := 0
 	inconvenienceLostCustomers := 0
 	for _, lostCustomer := range s.CustomersLost {
@@ -391,7 +399,8 @@ func (s *StoreAgent) PrintResults() {
 			inconvenienceLostCustomers++
 		}
 	}
-	fmt.Println("\nCustomers Lost: ", len(s.CustomersLost))
+	fmt.Println("\n[Customers Lost]")
+	fmt.Println("Customers Lost: ", len(s.CustomersLost))
 	fmt.Println("Customers Lost due to Emergency: ", emergencyLostCustomers)
 	fmt.Println("Customers Lost due to Inconvenience", inconvenienceLostCustomers)
 }
