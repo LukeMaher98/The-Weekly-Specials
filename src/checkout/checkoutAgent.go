@@ -68,15 +68,15 @@ func (co *CheckoutAgent) ProcessCustomer(shift int) {
 
 			sleepTime := time.Millisecond
 			if shift == 0 {
-				sleepTime = time.Duration(int((co.CurrentCustomerProgress/30) * co.FirstShiftCashier.TimeToProcess()))
+				sleepTime = time.Duration(int((co.CurrentCustomerProgress/60) * co.FirstShiftCashier.TimeToProcess()))
 			} else if shift == 1 {
-				sleepTime = time.Duration(int((co.CurrentCustomerProgress/30) * co.SecondShiftCashier.TimeToProcess()))
+				sleepTime = time.Duration(int((co.CurrentCustomerProgress/60) * co.SecondShiftCashier.TimeToProcess()))
 			}
 
 			if co.CurrentCustomer.GetCashPreference() {
-				sleepTime += time.Duration(1.2 - ((co.FirstShiftCashier.GetAmicability() * co.CurrentCustomer.GetAmicability()) / 2.5)) / 10
+				sleepTime += time.Duration(1.2 - ((co.FirstShiftCashier.GetAmicability() * co.CurrentCustomer.GetAmicability()) / 2.5)) / 20
 			} else {
-				sleepTime += time.Duration(1.2 - ((co.FirstShiftCashier.GetAmicability() * co.CurrentCustomer.GetAmicability()) / 2.5)) / 30
+				sleepTime += time.Duration(1.2 - ((co.FirstShiftCashier.GetAmicability() * co.CurrentCustomer.GetAmicability()) / 2.5)) / 60
 			}
 
 			time.Sleep(sleepTime * time.Millisecond)
